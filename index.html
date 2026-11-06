@@ -52,19 +52,28 @@ button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 #mpp textarea{width:100%;box-sizing:border-box;margin-top:8px;background:#1b212a;color:#fff;border:1px solid #2f3846;border-radius:10px;padding:8px;font:12px monospace}
 #mpp input{padding:10px;border-radius:10px;background:#1b212a;color:#fff;border:1px solid #2f3846;font-size:15px;width:120px}
 #mpp select,#mpp button{padding:10px;border-radius:10px;background:#1b212a;color:#fff;border:1px solid #2f3846;font-size:15px;margin:4px 2px}#mpt{color:#9aa4b2;margin:6px 0}
+.top{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 130px)}
+#cli{position:fixed;top:calc(86px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#ff9f1c;color:#000;font:700 14px system-ui,sans-serif;padding:6px 14px;border-radius:20px;box-shadow:0 0 16px #ff9f1c;display:none;pointer-events:none;white-space:nowrap;animation:clp .7s infinite alternate}@keyframes clp{to{opacity:.6}}
+#oac{position:fixed;top:calc(98px + env(safe-area-inset-top,0px));left:12px;max-width:62vw;color:#fff;font:13px system-ui,sans-serif;text-shadow:0 1px 3px #000a;display:none;pointer-events:none}
+#aim button.on,#aip button.on,#aio button.on,#acol button.on{background:#4cc3ff;color:#000}
+#aic{position:fixed;top:calc(78px + env(safe-area-inset-top,0px));left:12px;max-width:62vw;color:#fff;font:13px system-ui,sans-serif;text-shadow:0 1px 3px #000a;display:none;pointer-events:none}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="hud">0 <small>km/h</small></div><div id="trk"><span id="tt"></span><i><b id="db"></b></i></div>
-<div class="top"><button id="mute" aria-label="Toggle sound">🔊</button><button id="view">View: Chase</button><button id="rst">Reset</button><button id="mnu">Menu</button></div>
-<div id="menu"><div class="card"><h2>🛻 Bronco Drive</h2><p>Pick a level, or drive a random path.</p><div id="lv"></div><div class="rnd">Random path: <button data-s="R1">Easy</button><button data-s="R2">Medium</button><button data-s="R3">Hard</button></div>
-<div class="rnd"><button id="mp2">👥 Two players (WiFi)</button></div>
-<div id="mpp" style="display:none;margin-top:10px;text-align:left"><div id="mpa"><select id="mpl"><option value="L1">1 · Sunny Meadow</option><option value="L2">2 · Rolling Hills</option><option value="L3">3 · Ridge Trail</option><option value="L4">4 · Rocky Climb</option><option value="L5">5 · Mountain Pass</option><option value="R2">Random path</option></select> <button id="mph">Host (codes)</button> <button id="mpj">Join (codes)</button>
-<div style="margin:10px 0 2px;color:#9aa4b2;font-size:13px">Or use a room name (needs internet): type the same name on both phones, nothing to copy.</div><input id="mpn" placeholder="room name" autocapitalize="off"> <button id="mpqh">Host room</button> <button id="mpqj">Join room</button></div>
-<div id="mpb" style="display:none"><p id="mpt"></p><textarea id="mpc" readonly rows="3"></textarea><button id="mps">Copy / share code</button><textarea id="mpr" rows="3" placeholder="Paste the other phone's code here"></textarea><button id="mpg">Connect</button></div></div></div></div>
-<div id="tilt"><i></i></div><div id="msg" style="display:none"><b id="mt"></b><br><span id="ms"></span><br><button id="mb"></button> <button id="mn">New track</button></div>
+<div class="top"><button id="mute" aria-label="Toggle sound">馃攰</button><button id="aib">&#129489; You</button><button id="aisb">AI: Slow</button><button id="view">View: Chase</button><button id="rst">Reset</button><button id="mnu">Menu</button></div>
+<div id="menu"><div class="card"><h2>馃浕 Bronco Drive</h2><p>Pick a level, or drive a random path.</p><div id="lv"></div><div class="rnd">Random path: <button data-s="R1">Easy</button><button data-s="R2">Medium</button><button data-s="R3">Hard</button></div>
+<div class="rnd" id="aim">Driver: <button data-a="">&#129489; You</button><button data-a="auto">&#129302; Auto</button></div>
+<div class="rnd" id="aio">Race vs AI (opponents): <button data-o="">Off</button><button data-o="1">1</button><button data-o="2">2</button><button data-o="3">3</button><button data-o="4">4</button></div>
+<div class="rnd" id="acol">Car collisions (2 players, AI race): <button data-c="0">Off</button><button data-c="1">On</button></div>
+<div class="rnd" id="aip">AI speed: <button data-p="0">Slow</button><button data-p="1">Medium</button><button data-p="2">Fast</button></div>
+<div class="rnd"><button id="mp2">馃懃 Two players (WiFi)</button></div>
+<div id="mpp" style="display:none;margin-top:10px;text-align:left"><div id="mpa"><select id="mpl"><option value="L1">1 路 Sunny Meadow</option><option value="L2">2 路 Rolling Hills</option><option value="L3">3 路 Ridge Trail</option><option value="L4">4 路 Rocky Climb</option><option value="L5">5 路 Mountain Pass</option><option value="R2">Random path</option></select>
+<div style="margin:10px 0 2px;color:#9aa4b2;font-size:13px">Needs internet: pick a track, type the same room name on both phones, then one taps Host room and the other Join room.</div><input id="mpn" placeholder="room name" autocapitalize="off"> <button id="mpqh">Host room</button> <button id="mpqj">Join room</button></div>
+<div id="mpb" style="display:none"><p id="mpt"></p></div></div></div></div>
+<canvas id="mmap" width="280" height="280" style="position:fixed;left:10px;top:calc(82px + env(safe-area-inset-top,0px));width:130px;height:130px;background:#00000022;border-radius:12px;pointer-events:none;display:none"></canvas><div id="cli"></div><div id="aic"></div><div id="oac"></div><div id="tilt"><i></i></div><div id="msg" style="display:none"><b id="mt"></b><br><span id="ms"></span><br><button id="mb"></button> <button id="mn">New track</button></div>
 <div id="bar"><div id="dash"><canvas id="dGS" width="240" height="240"></canvas><div id="mid"><div id="gear">D1</div><div id="sel"></div></div><canvas id="dGR" width="240" height="240"></canvas></div><div id="wheel" role="slider" aria-label="Steering wheel"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="#ffffff44"/><g stroke="#1c1c20" stroke-linecap="round"><circle cx="50" cy="50" r="41" fill="none" stroke-width="9"/><line x1="9" y1="50" x2="91" y2="50" stroke-width="7"/><line x1="50" y1="50" x2="50" y2="91" stroke-width="7"/></g><circle cx="50" cy="50" r="13" fill="#2c2c32"/><rect x="46" y="5" width="8" height="9" rx="2" fill="#d1101c"/></svg></div>
-<button id="drv" aria-label="Switch between drive and reverse"><span id="drvL">D</span><small>D ⇄ R</small></button>
-<div class="pedals"><button class="pb" data-k="brake" aria-label="Brake">▼</button><button class="pb big" data-k="gas" aria-label="Accelerate: press higher on the pedal for more gas">GAS</button></div></div>
+<button id="drv" aria-label="Switch between drive and reverse"><span id="drvL">D</span><small>D 鈬?R</small></button>
+<div class="pedals"><button class="pb" data-k="brake" aria-label="Brake">鈻?/button><button class="pb big" data-k="gas" aria-label="Accelerate: press higher on the pedal for more gas">GAS</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
@@ -72,10 +81,10 @@ button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 const SRC='<!doctype html>'+document.documentElement.outerHTML;
 const SEL0=window.__SEL!==undefined?window.__SEL:(/^(L[1-5]|R[1-3])$/.test(location.hash.slice(1))?location.hash.slice(1):null);
 let bdFrame=null;const menuEl0=document.getElementById('menu');
-function bdLaunch(sel,seed,mp){if(bdFrame)bdFrame.remove();bdFrame=document.createElement('iframe');
+function bdLaunch(sel,seed,mp,col){if(bdFrame)bdFrame.remove();bdFrame=document.createElement('iframe');
  bdFrame.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;z-index:30;background:#000';bdFrame.setAttribute('allow','autoplay');
  bdFrame.onload=()=>{try{bdFrame.contentWindow.focus()}catch(e){}};
- bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP=1;':'')+'<\/script>');
+ bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP=1;':'')+(AIM?'window.__AI="'+AIM+'";':'')+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
  document.body.appendChild(bdFrame);menuEl0.style.display='none'}
 addEventListener('message',e=>{const d=e.data;if(!d||!d.bd)return;
  if(d.bd==='go')bdLaunch(d.sel);else if(d.bd==='net'&&bdFrame&&e.source===bdFrame.contentWindow)mpFromGame(d.m);
@@ -85,56 +94,71 @@ if(SEL0===null){const lv=document.getElementById('lv');
   b.innerHTML='<b>'+(i+1)+'</b> '+n+' <span>'+'\u2605'.repeat(i+1)+'\u2606'.repeat(4-i)+'</span>';b.onclick=()=>bdLaunch('L'+(i+1));lv.appendChild(b)});
  menuEl0.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>bdLaunch(b.dataset.s));menuEl0.style.display='flex'}
 
-// ---- two players: WebRTC data channel; the phones pair by exchanging two short codes (no server) ----
+// ---- driver choice (You / Auto / Auto + Claude): remembered, passed to every level ----
+let AIM='';try{AIM=localStorage.getItem('bd-ai')||''}catch(e){}if(AIM==='claude')AIM='auto';
+function aimShow(){document.querySelectorAll('#aim button').forEach(b=>b.classList.toggle('on',b.dataset.a===AIM))}
+document.querySelectorAll('#aim button').forEach(b=>b.onclick=()=>{AIM=b.dataset.a;try{localStorage.setItem('bd-ai',AIM)}catch(e){}aimShow()});aimShow();
+
+let AIP=0;try{AIP=+localStorage.getItem('bd-aip')||0}catch(e){}
+function aipShow(){document.querySelectorAll('#aip button').forEach(b=>b.classList.toggle('on',+b.dataset.p===AIP))}
+document.querySelectorAll('#aip button').forEach(b=>b.onclick=()=>{AIP=+b.dataset.p;try{localStorage.setItem('bd-aip',AIP)}catch(e){}aipShow()});aipShow();
+// ---- Claude access lives in the launcher (top) page: the game iframe asks it by postMessage, so it works wherever the top page can reach Claude ----
+const CC={key:'',nf:0,noWC:0,noFetch:0,asked:0,err:''};
+const ccKey=()=>{try{return localStorage.getItem('bd-key')||CC.key||''}catch(e){return CC.key||''}};
+const ccTmo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
+async function ccPost(headers,model,sys,usr,ms){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),ms);
+ try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal:ac.signal,headers:Object.assign({'content-type':'application/json'},headers),body:JSON.stringify({model:model,max_tokens:300,system:sys,messages:[{role:'user',content:usr}]})});
+  const d=await r.json();if(!r.ok)throw new Error((d.error&&d.error.message)||r.status);const t=Array.isArray(d.content)?d.content.map(c=>typeof c==='string'?c:(c&&c.text)||'').join(''):String(d.completion||d.text||'');if(!t.trim())throw new Error('empty reply ('+model+'): '+JSON.stringify(d).slice(0,150));return t}
+ catch(e){throw new Error(e.name==='AbortError'?'request timed out':e.message==='Failed to fetch'?'request blocked or offline (inside the Claude app, try opening this file in Chrome)':e.message)}
+ finally{clearTimeout(to)}}
+async function claudeCore(sys,usr){
+ const key=ccKey();
+ if(key)return ccPost({'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},'claude-haiku-5-5',sys,usr,8000);
+ if(!CC.noFetch){try{return await ccPost({},'claude-sonnet-4-6',sys,usr,8000)}catch(e){CC.err=e.message;if(++CC.nf>=3)CC.noFetch=1}} // keyless route used inside Claude artifacts
+ if(window.claude&&window.claude.complete&&!CC.noWC){try{const r=await ccTmo(window.claude.complete(sys+'\n\n'+usr),8000),t=typeof r==='string'?r:(r&&(r.completion||r.text||r.content))||JSON.stringify(r);if(String(t).trim())return String(t);throw new Error('empty reply (built-in): '+JSON.stringify(r))}catch(e){CC.err+=' | '+e.message;if(e.message==='timeout')CC.noWC=1}}
+  throw new Error('no route to Claude ('+CC.err+') - paste an API key in the Menu')}
+addEventListener('message',async e=>{const d=e.data;if(!d||d.bd!=='claude')return;let r;
+ try{r={bd:'claude-r',id:d.id,text:await claudeCore(d.sys,d.usr)}}catch(x){r={bd:'claude-r',id:d.id,err:x.message}}
+ try{e.source.postMessage(r,'*')}catch(x){}});
+{const ak=document.getElementById('akey'),st=document.getElementById('akst');
+ if(ak){if(ccKey())st.textContent='saved';document.getElementById('aksv').onclick=()=>{const k=ak.value.trim();if(!k)return;CC.key=k;let m='saved for this session';try{localStorage.setItem('bd-key',k);m='saved'}catch(e){}ak.value='';st.textContent=m}}}
+let AIO='';try{AIO=localStorage.getItem('bd-aio')||''}catch(e){}if(AIO==='claude'||AIO==='auto')AIO='1';
+function aioShow(){document.querySelectorAll('#aio button').forEach(b=>b.classList.toggle('on',b.dataset.o===AIO))}
+document.querySelectorAll('#aio button').forEach(b=>b.onclick=()=>{AIO=b.dataset.o;try{localStorage.setItem('bd-aio',AIO)}catch(e){}aioShow()});aioShow();
+let COL=1;try{const v=localStorage.getItem('bd-col');if(v!==null)COL=+v}catch(e){}
+function colShow(){document.querySelectorAll('#acol button').forEach(b=>b.classList.toggle('on',+b.dataset.c===COL))}
+document.querySelectorAll('#acol button').forEach(b=>b.onclick=()=>{COL=+b.dataset.c;try{localStorage.setItem('bd-col',COL)}catch(e){}colShow()});colShow();
+// ---- two players: room method (host a room / join a room by name) ----
 const MP={pc:null,dc:null,role:'',sel:'L1',seed:0,rdy:0,mode:''};
 const mpStat=t=>{const e=document.getElementById('mpt');if(e)e.textContent=t};
-const b64=u=>btoa(String.fromCharCode(...u)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-const unb64=t=>Uint8Array.from(atob(t.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
-async function pipe(u8,C){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new C('deflate-raw'))).arrayBuffer())}
-const enc=async d=>b64(await pipe(new TextEncoder().encode(JSON.stringify({t:d.type,s:d.sdp})),CompressionStream));
-const rd=async c=>{const d=JSON.parse(new TextDecoder().decode(await pipe(unb64(c.trim()),DecompressionStream)));return{type:d.t,sdp:d.s}};
-const gathered=pc=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();pc.addEventListener('icegatheringstatechange',()=>pc.iceGatheringState==='complete'&&r());setTimeout(r,3500)});
 const send=m=>{if(MP.dc&&MP.dc.readyState==='open')MP.dc.send(JSON.stringify(m))};
 const toGame=m=>{try{bdFrame&&bdFrame.contentWindow.postMessage({bdnet:m},'*')}catch(e){}};
 function mpClose(){try{MP.dc&&MP.dc.close();MP.pc&&MP.pc.close();MP.peer&&MP.peer.destroy()}catch(e){}MP.pc=MP.dc=MP.peer=null;MP.rdy=0}
-function mkPc(){mpClose();const pc=MP.pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
- pc.onconnectionstatechange=()=>{if(['failed','disconnected','closed'].includes(pc.connectionState))toGame({t:'left'})};return pc}
 function setDc(dc){MP.dc=dc;
- dc.onopen=()=>{mpStat('Connected!');if(MP.role==='host'){send({t:'start',sel:MP.sel,seed:MP.seed});bdLaunch(MP.sel,MP.seed,1)}};
- dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t==='start')bdLaunch(m.sel,m.seed,1);else if(m.t==='ready'){MP.rdy|=2;chkGo()}else toGame(m)}}
+ dc.onopen=()=>{mpStat('Connected!');if(MP.role==='host'){send({t:'start',sel:MP.sel,seed:MP.seed,col:COL});bdLaunch(MP.sel,MP.seed,1)}};
+ dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t==='start')bdLaunch(m.sel,m.seed,1,m.col);else if(m.t==='ready'){MP.rdy|=2;chkGo()}else toGame(m)}}
 function chkGo(){if(MP.rdy===3){MP.rdy=0;send({t:'go'});toGame({t:'go'})}}
 function mpFromGame(m){if(m.t==='ready'&&MP.role==='host'){MP.rdy|=1;chkGo()}else send(m)}
-async function mpHost(sel){const pc=mkPc();MP.role='host';MP.sel=sel;MP.seed=(Math.random()*1e9)|0;setDc(pc.createDataChannel('g'));await pc.setLocalDescription(await pc.createOffer());await gathered(pc);return enc(pc.localDescription)}
-async function mpJoin(code){const pc=mkPc();MP.role='guest';pc.ondatachannel=e=>setDc(e.channel);await pc.setRemoteDescription(await rd(code));await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);return enc(pc.localDescription)}
 const mpShow=(id,v)=>{document.getElementById(id).style.display=v?'block':'none'};
 function mpReset(){mpShow('mpp',0);mpShow('mpa',1);mpShow('mpb',0)}
 {const $=id=>document.getElementById(id);
  $('mp2').onclick=()=>mpShow('mpp',1);
- $('mph').onclick=async()=>{mpShow('mpa',0);mpShow('mpb',1);['mpc','mps','mpr','mpg'].forEach(i=>mpShow(i,0));MP.mode='host';mpStat('Creating code...');
-  try{$('mpc').value=await mpHost($('mpl').value);['mpc','mps','mpr','mpg'].forEach(i=>mpShow(i,1));mpStat('1) Send this code to the other phone. 2) Paste its reply code below and tap Connect.')}catch(e){mpStat('Could not create a code: '+e.message)}};
- $('mpj').onclick=()=>{mpShow('mpa',0);mpShow('mpb',1);['mpc','mps'].forEach(i=>mpShow(i,0));['mpr','mpg'].forEach(i=>mpShow(i,1));MP.mode='join';mpStat('Paste the code from the host phone, then tap Connect.')};
- $('mpg').onclick=async()=>{const v=$('mpr').value;
-  try{if(MP.mode==='host'){await mpAccept(v);mpStat('Connecting... keep both phones on the same WiFi.');
-    setTimeout(()=>{if(!MP.dc||MP.dc.readyState!=='open')mpStat('Could not connect. Both phones must be on the same WiFi (not a guest network). Go back and try again.')},20000)}
-   else{mpStat('Working...');$('mpc').value=await mpJoin(v);['mpc','mps'].forEach(i=>mpShow(i,1));['mpr','mpg'].forEach(i=>mpShow(i,0));mpStat('Send this reply code back to the host. The game starts when it connects.')}}
-  catch(e){mpStat('That code did not work: '+e.message)}};
  try{$('mpn').value=localStorage.getItem('bd-room')||''}catch(e){}
- const quick=h=>()=>{mpShow('mpa',0);mpShow('mpb',1);['mpc','mps','mpr','mpg'].forEach(i=>mpShow(i,0));mpQuick(h,$('mpl').value)};
+ const quick=h=>()=>{mpShow('mpa',0);mpShow('mpb',1);mpQuick(h,$('mpl').value)};
  $('mpqh').onclick=quick(true);$('mpqj').onclick=quick(false);
- $('mps').onclick=async()=>{const c=$('mpc').value;try{if(navigator.share)await navigator.share({text:c});else{await navigator.clipboard.writeText(c);mpStat('Copied.')}}catch(e){$('mpc').select()}}}
+}
 // room-name mode: PeerJS public signalling service pairs the phones by name; the game data still goes phone to phone
 const roomId=()=>{const n=document.getElementById('mpn').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'');try{localStorage.setItem('bd-room',n)}catch(e){}return n?'bronco-drive-'+n:''};
 function peerDc(conn){const dc={get readyState(){return conn.open?'open':'closed'},send:s=>conn.send(s),close:()=>{try{conn.close()}catch(e){}}};
  conn.on('open',()=>dc.onopen&&dc.onopen());conn.on('data',d=>dc.onmessage&&dc.onmessage({data:d}));conn.on('close',()=>toGame({t:'left'}));return dc}
 function mpQuick(host,sel){
- if(typeof Peer==='undefined'){mpStat('Room names need internet and the PeerJS library, which is not available here. Use the codes instead.');return}
+ if(typeof Peer==='undefined'){mpStat('Room names need internet and the PeerJS library, which is not available here.');return}
  const id=roomId();if(!id){mpStat('Type a room name first.');return}
  mpClose();MP.role=host?'host':'guest';MP.sel=sel;MP.seed=(Math.random()*1e9)|0;
  const peer=MP.peer=host?new Peer(id):new Peer();mpStat(host?'Opening the room...':'Looking for the room...');
  peer.on('error',e=>mpStat(e.type==='unavailable-id'?'That room name is already in use. Join it, or pick another name.':e.type==='peer-unavailable'?'Nobody is hosting that room yet. Ask the host to open it first.':'Connection problem: '+e.type));
  peer.on('open',()=>{if(host)mpStat('Room is open. On the other phone, join the same room name.');else setDc(peerDc(peer.connect(id,{reliable:true})))});
  peer.on('connection',c=>{const d=peerDc(c);setDc(d);if(c.open)d.onopen()})}
-async function mpAccept(c){await MP.pc.setRemoteDescription(await rd(c))}
 function __game(){
 const cv=document.getElementById('c');
 const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
@@ -363,8 +387,8 @@ function audioInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitA
 const wake=()=>{audioInit();if(AC&&AC.state==='suspended')AC.resume()};
 ['pointerdown','pointerup','touchend','click','keydown'].forEach(n=>addEventListener(n,wake));
 document.addEventListener('visibilitychange',()=>{if(AC)document.hidden?AC.suspend():AC.resume()});
-const muteBtn=document.getElementById('mute');muteBtn.textContent=muted?'🔇':'🔊';
-muteBtn.onclick=()=>{muted=!muted;muteBtn.textContent=muted?'🔇':'🔊';try{localStorage.setItem('bd-muted',muted?'1':'0')}catch(e){}};
+const muteBtn=document.getElementById('mute');muteBtn.textContent=muted?'馃攪':'馃攰';
+muteBtn.onclick=()=>{muted=!muted;muteBtn.textContent=muted?'馃攪':'馃攰';try{localStorage.setItem('bd-muted',muted?'1':'0')}catch(e){}};
 const GM=[7,13,19,25,40];
 function engine(){if(!AC||AC.state!=='running')return;
  const rpm=.18+.82*cl((DR.w*9.549-700)/5800,0,1),thr=DR.gas,t=AC.currentTime,f=26+rpm*80;
@@ -417,7 +441,7 @@ function physStep(dt,inp){
    push(P,v_add(v_mul(n,Fn),v_mul(vt,-Math.min(.7*Fn/(sp+.02),30000))))}
   fence(P,hg,vel,push);for(const o of obs){const dx=P[0]-o.x,dz=P[2]-o.z;if(Math.abs(dx)>3||Math.abs(dz)>3)continue;
    const dd=Math.hypot(dx,dz),rr=o.r+.1;
-   if(dd<rr&&P[1]<o.t){const nx=dx/(dd||1),nz=dz/(dd||1),vp=vel(P),vn=vp[0]*nx+vp[2]*nz,Fn=Math.min(120000,100000*(rr-dd)+(vn<0?-8000*vn:0));push(P,[nx*Fn,0,nz*Fn])}}}
+   if(dd<rr&&P[1]<o.t){const nx=dx/(dd||1),nz=dz/(dd||1),vp=vel(P),vn=vp[0]*nx+vp[2]*nz,Fn=Math.min(120000,100000*(rr-dd)+(vn<0?-8000*vn:0));push(P,[nx*Fn,0,nz*Fn])}}if(OTH.on)carHit(P,vel,push)}
  for(const i of[0,2])if(Math.abs(s.p[i])>235){const f=[0,0,0];f[i]=-(s.p[i]-Math.sign(s.p[i])*235)*20000;push(s.p,f)}
  s.v=v_add(s.v,v_mul(F,dt/MASS));
  const wb=[Rm[0][0]*s.w[0]+Rm[1][0]*s.w[1]+Rm[2][0]*s.w[2],Rm[0][1]*s.w[0]+Rm[1][1]*s.w[1]+Rm[2][1]*s.w[2],Rm[0][2]*s.w[0]+Rm[1][2]*s.w[1]+Rm[2][2]*s.w[2]];
@@ -431,7 +455,7 @@ function physStep(dt,inp){
  s.q=nq.map(c=>c/l);
 }
 
-// ---- drivetrain: engine → clutch → gearbox → wheels (from the drivetrain simulator) ----
+// ---- drivetrain: engine 鈫?clutch 鈫?gearbox 鈫?wheels (from the drivetrain simulator) ----
 const GEARS=[0,3.6,2.2,1.55,1.15,.92,.75],FDR=5.9,RWH=.46,IWH=3,BRKT=1840,JENG=.22,RVR=-3.4,TCM=480,TCK=.0022,TR0=2.2,SRC=.85,FR0=25,FR1=.025,FR2=.06;
 const DR={w:94,sel:'N',pend:null,gn:1,gas:0,brk:0,idleI:.12,ramp:1,cut:false,cool:0,Te:0,Tc:0,Tw:0,eng:0,thr:0};
 const sstep=x=>{x=cl(x,0,1);return x*x*(3-2*x)},Tmax=w=>Math.max(60,340*(1-(((w*9.549)-4200)/4500)**2));
@@ -484,7 +508,7 @@ function gauge(cv,val,max,stp,div,label,txt,red){const c=cv.getContext('2d'),W=c
  c.fillStyle='#161a20';c.beginPath();c.arc(cx,cx,W*.05,0,7);c.fill();
  c.fillStyle='#e6e9ee';c.font='bold '+W*.11+'px system-ui';c.fillText(txt,cx,cx+r*.5);c.fillStyle='#8a94a3';c.font=W*.05+'px system-ui';c.fillText(label,cx,cx+r*.7)}
 const dGS=document.getElementById('dGS'),dGR=document.getElementById('dGR'),gearEl=document.getElementById('gear');
-function dashUpdate(sp){gauge(dGS,sp*3.6,280,20,1,'km/h',Math.round(sp*3.6));gauge(dGR,DR.w*9.549,8000,1000,1000,'x1000 rpm',Math.round(DR.w*9.549),6500);gearEl.textContent=(DR.sel==='D'?'D'+DR.gn:DR.sel)+(sim.slip>.15?' ⚠':'');gearEl.style.color=sim.slip>.15?'#ff6a3d':'#4cc3ff'}
+function dashUpdate(sp){gauge(dGS,sp*3.6,280,20,1,'km/h',Math.round(sp*3.6));gauge(dGR,DR.w*9.549,8000,1000,1000,'x1000 rpm',Math.round(DR.w*9.549),6500);gearEl.textContent=(DR.sel==='D'?'D'+DR.gn:DR.sel)+(sim.slip>.15?' 鈿?:'');gearEl.style.color=sim.slip>.15?'#ff6a3d':'#4cc3ff'}
 // ---- game: damage, progress, timer, finish / crash ----
 const G={state:'run',dmg:0,t:0,go:false,prog:0,flip:0,grace:1.5,hit(dv){if(G.state==='run'&&G.grace<=0)G.dmg=Math.min(100,G.dmg+(dv-4)*LV.dmg)}};
 const gtt=document.getElementById('tt'),gdb=document.getElementById('db'),mtt=document.getElementById('mt'),mss=document.getElementById('ms'),mbtn=document.getElementById('mb');
@@ -493,7 +517,7 @@ function gmReset(){G.state='run';G.dmg=0;G.t=0;G.go=false;G.prog=0;G.flip=0;G.gr
 function gmEnd(ok){G.state=ok?'done':'crash';mtt.textContent=ok?'\u{1F3C1} Finished!':'\u{1F4A5} Crashed!';
  mss.textContent=ok?'Time '+fmtT(G.t)+' \u00b7 damage '+Math.round(G.dmg)+'%':'Track '+Math.round(G.prog*100)+'% \u00b7 '+(G.dmg>=100?'car destroyed':'rolled over');
  if(MPG&&ok){mpSend({t:'fin',time:G.t});mss.textContent+=rm.fin==null?' \u00b7 You finished first!':(G.t<rm.fin?' \u00b7 You won!':' \u00b7 Opponent was faster')}
- mbtn.textContent=ok?'Drive again':'Try again';mnb.textContent=(ok&&!RND&&LVI<4&&!MPG)?'Next level \u25b6':'Menu';msg.style.display='block'}
+ if(NOPP&&ok)mss.textContent+=' \u00b7 Place '+(1+OPS.filter(o=>o.fin!=null&&o.fin<G.t).length)+' of '+(NOPP+1);mbtn.textContent=ok?'Drive again':'Try again';mnb.textContent=(ok&&!RND&&LVI<4&&!MPG)?'Next level \u25b6':'Menu';msg.style.display='block'}
 mbtn.onclick=()=>resetCar();const mnb=document.getElementById('mn'),menuEl=document.getElementById('menu');
 function goTo(sel){parent.postMessage({bd:sel===''?'menu':'go',sel},'*')}
 mnb.onclick=()=>goTo((G.state==='done'&&!RND&&LVI<4&&!MPG)?'L'+(LVI+2):'');
@@ -527,10 +551,169 @@ function onNet(m){
  else if(m.t==='go'){let n=3;G.state='wait';const tick=()=>{if(n>0){mpSay(String(n--));setTimeout(tick,1000)}else{resetCar();G.go=true;mpSay('GO!');setTimeout(()=>mpSay(''),800)}};tick()}}
 addEventListener('message',e=>{if(e.data&&e.data.bdnet)onNet(e.data.bdnet)});
 function mpFrame(dt){mpT+=dt;
- if(mpT>.05&&G.state!=='wait'){mpT=0;const r=v=>+v.toFixed(2);mpSend({t:'pos',p:sim.p.map(r),q:sim.q.map(v=>+v.toFixed(3)),v:sim.v.map(r),pg:+G.prog.toFixed(3)})}
+ if(mpT>.033&&G.state!=='wait'){mpT=0;const r=v=>+v.toFixed(2);mpSend({t:'pos',p:sim.p.map(r),q:sim.q.map(v=>+v.toFixed(3)),v:sim.v.map(r),pg:+G.prog.toFixed(3)})}
  if(rm.has){const a=Math.min(1,dt*14),age=Math.min(.15,(performance.now()-rm.at)/1000);
   rp.x+=(rm.p[0]+rm.v[0]*age-rp.x)*a;rp.y+=(rm.p[1]+rm.v[1]*age-rp.y)*a;rp.z+=(rm.p[2]+rm.v[2]*age-rp.z)*a;rq.slerp(rm.q,a);
   ghost.children[0].position.copy(rp);ghost.children[0].quaternion.copy(rq)}}
+// ---- AI driver: 'auto' = algorithm only; 'claude' = algorithm + Claude check-in every ~2 s. Both only write the same controls a human uses (wheel, gas, brake, D/R). ----
+const cli=document.getElementById('cli'),aib=document.getElementById('aib'),aic=document.getElementById('aic'),brkEl=document.querySelector('.pb[data-k=brake]');
+const AI={mode:'',t:0,off:0,ig:0,stk:0,rec:0,rg:0,gr:0,ck:0,busy:0,ov:null,ovg:0,plan:{},spd:Math.max(0,Math.min(2,window.__AIS|0))},AI_MODEL='claude-haiku-5-5';
+const AISYS='You are the co-driver of a simulated off-road truck (Ford Bronco). An algorithm drives (path following + obstacle avoidance). Every ~2 s you get a JSON snapshot. Coordinates are metres in the car frame: f = ahead, l = left (negative = right). Intervene ONLY if the algorithm is about to fail: heading into a rock or tree, leaving the road, stuck, too fast for a bend, about to roll over. Otherwise answer {"intervene":false}. Controls: steer -1 (full right) to 1 (full left); gas 0-1 in steps of 0.2; brake true/false; gear "D" or "R" (reverse only to get unstuck). Your command is applied about 1 s after the snapshot and lasts "duration" seconds (0.4-2.5), so plan ahead. Omitted controls stay with the algorithm. Reply with ONE line of compact JSON, nothing else (no explanation, no code fences), starting with { : {"intervene":true,"steer":0.5,"gas":0.4,"brake":false,"gear":"D","duration":1.5,"reason":"max 10 words"}';
+function aiKey(){try{return localStorage.getItem('bd-key')||''}catch(e){return''}}
+const tmo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
+async function claudeAsk(sys,usr){
+ if(window.parent!==window)return new Promise((res,rej)=>{const id=Math.random().toString(36).slice(2),
+  to=setTimeout(()=>{removeEventListener('message',h);rej(new Error('no reply from launcher (30 s)'))},30000),
+  h=e=>{const d=e.data;if(d&&d.bd==='claude-r'&&d.id===id){clearTimeout(to);removeEventListener('message',h);d.err?rej(new Error(d.err)):res(d.text)}};
+  addEventListener('message',h);parent.postMessage({bd:'claude',id:id,sys:sys,usr:usr},'*')});
+ return claudeCore(sys,usr)}
+function aiNote(t,warn){AI.last=t;aic.textContent='Claude: '+t;aic.style.color=warn?'#ffd24a':'#fff'}
+function aiReset(){AI.t=0;AI.off=0;AI.ig=0;AI.stk=0;AI.rec=0;AI.rg=0;AI.gr=0;AI.ck=0;AI.ov=null;AI.ovg=0}
+function aiSet(m){if(m==='claude')m='auto';if(MPG)m='';AI.mode=m;aiReset();cli.style.display='none';
+ if(m){wDrag='ai';keys.left=keys.right=0; // wDrag='ai' stops the wheel from self-centring, so the AI holds the angle it sets
+  if(m==='claude'){aic.style.display='block';aiNote('checking every 2 s',0);
+   }
+  else aic.style.display='none'}
+ else{if(wDrag==='ai')wDrag=null;keys.gas=keys.brake=0;gasEl.classList.remove('on');brkEl.classList.remove('on');aic.style.display='none'}
+ aib.textContent=m==='auto'?'\u{1F916} Auto':m==='claude'?'\u{1F916}+Claude':'\u{1F9D1} You'}
+function aiSnap(i,lt){const sn=Math.sin(car.h),cs=Math.cos(car.h),loc=(x,z)=>{const dx=x-car.x,dz=z-car.z;return[+(dx*sn+dz*cs).toFixed(1),+(dx*cs-dz*sn).toFixed(1)]},Rm=matQ(sim.q),ob=[];
+ for(const q of obs){const p=loc(q.x,q.z);if(p[0]>-4&&p[0]<45&&Math.abs(p[1])<HW+4&&roadD(q.x,q.z)<HW+3)ob.push([p[0],p[1],+q.r.toFixed(1)])}
+ ob.sort((a,b)=>a[0]-b[0]);
+ return{speed_ms:+car.v.toFixed(1),road_half_width:HW,car_offset_from_centre_left:+lt.toFixed(1),road_heading_vs_car_deg_left:Math.round(wrap(RA[i]-car.h)*57.3),
+  pitch_deg_nose_up:Math.round(Math.asin(cl(Rm[1][2],-1,1))*57.3),roll_deg_left_up:Math.round(Math.asin(cl(Rm[1][0],-1,1))*57.3),
+  road_centre_ahead_5_10_15_20_30m_f_l:[5,10,15,20,30].map(m=>{const j=Math.min(RN-1,i+Math.round(m/2));return loc(RX[j],RZ[j])}),
+  obstacles_f_l_radius:ob.slice(0,8),algorithm_now:AI.plan,damage_pct:Math.round(G.dmg),progress_pct:Math.round(G.prog*100),stuck:AI.rec>0}}
+function aiParse(t){const m=t.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0])}catch(e){}}
+ if(/"intervene"\s*:\s*false/.test(t))return{intervene:false};
+ const i=t.indexOf('{');if(i>=0){try{return JSON.parse(t.slice(i).replace(/[,\s]+$/,'')+'}')}catch(e){}}
+ throw new Error('bad reply: '+JSON.stringify(t.slice(0,70)))}
+async function aiAsk(snap){AI.busy=1;AI.n=(AI.n||0)+1;const nn=AI.n,m=AI.mode,t0=performance.now();aic.textContent='Claude: '+(AI.last?AI.last+'  |  ':'')+'asking #'+nn+'...';
+ try{const d=aiParse(await claudeAsk(AISYS,JSON.stringify(snap))),s=((performance.now()-t0)/1000).toFixed(1)+'s',num=x=>typeof x==='number'&&isFinite(x)?x:null;
+  if(AI.mode===m&&G.state==='run'){
+   if(d.intervene){AI.ov={steer:num(d.steer)==null?null:cl(d.steer,-1,1),gas:num(d.gas),brake:typeof d.brake==='boolean'?d.brake:null,gear:d.gear==='R'||d.gear==='D'?d.gear:null,until:AI.t+cl(num(d.duration)||1.2,.4,2.5)};AI.ovg=0;aiNote('#'+nn+' intervening - '+(d.reason||'')+' ('+s+')',1)}
+   else aiNote('#'+nn+' all good ('+s+')',0)}}
+ catch(e){aiNote('#'+nn+' error - '+e.message,1)}
+ AI.busy=0;AI.ck=0}
+function aiFrame(dt){
+ if(!AI.mode)return;
+ if(G.state!=='run'){keys.gas=keys.brake=0;cli.style.display='none';return}
+ AI.t+=dt;const fs=car.v,i=near(car.x,car.z);if(i<0)return;
+ const lt=(car.x-RX[i])*Math.cos(RA[i])-(car.z-RZ[i])*Math.sin(RA[i]),Rm=matQ(sim.q);
+ // 1) lane choice: 9 constant-offset paths along the road; obstacles near a path are expensive, so the car swerves around rocks
+ const Lc=cl(12+1.8*Math.max(0,fs),14,42),n=Math.ceil(Lc/2),lim=HW-2.1,ob=obs.filter(q=>Math.abs(q.x-car.x)<Lc+8&&Math.abs(q.z-car.z)<Lc+8&&roadD(q.x,q.z)<HW+3).concat(OTH.list.map(c=>({x:c.p[0],z:c.p[2],r:1.3})));
+ let best=0,bc=1e9;
+ for(let k=-4;k<=4;k++){const o=k*lim/4;let c=Math.abs(o-AI.off)*.5+Math.abs(o)*.12;
+  for(const q of ob){let mn=99;for(let s=1;s<=n;s++){const j=Math.min(RN-1,i+s),d=Math.hypot(RX[j]+Math.cos(RA[j])*o-q.x,RZ[j]-Math.sin(RA[j])*o-q.z)-q.r-1.35;if(d<mn)mn=d}
+   c+=mn<0?500-mn*80:mn<3?(3-mn)*14:0}
+  if(c<bc){bc=c;best=o}}
+ const SP0=[3,3.8,4.6][AI.spd];AI.off+=cl(best-AI.off,-SP0*dt,SP0*dt);
+ // 2) steering: pure pursuit towards a point on the chosen lane (u: +1 = full left, -1 = full right)
+ const Ld=cl(6+.8*Math.max(0,fs),7,20),jt=Math.min(RN-1,i+Math.round(Ld/2)),tx=RX[jt]+Math.cos(RA[jt])*AI.off,tz=RZ[jt]-Math.sin(RA[jt])*AI.off,
+  al=wrap(Math.atan2(tx-car.x,tz-car.z)-car.h),sl=Math.min(.38,12/Math.max(1,fs*fs));
+ let u=cl(Math.atan2(4.8*Math.sin(al),Ld)/sl,-1,1);
+ // 3) speed: slow for bends, side slopes, tight steering and crowded lanes; small PI term for hills
+ let kx=0;for(let s=1;s<=14;s++){const a=Math.min(RN-1,i+s),b=Math.min(RN-1,i+s+2);kx=Math.max(kx,Math.abs(wrap(RA[b]-RA[a]))/4)}
+ const SP=[[1,3.2,3],[1.3,3.8,3.8],[1.6,4.4,4.6]][AI.spd],vMax=(14-1.6*LVI)*SP[0];let vT=Math.min(vMax,Math.sqrt(SP[1]/Math.max(kx,.004)))*(1-.3*Math.abs(u))*(1-cl(Math.abs(Rm[1][0])*1.5,0,.5))*(bc>40?.7:1);vT=cl(vT,4,vMax);
+ const e=vT-fs;AI.ig=cl(AI.ig+e*dt*.3,-.2,.7);
+ let g=e>-.6?cl(.12+.18*e+AI.ig,0,1):0;if(fs<3)g=Math.min(g,.6);
+ let b=(e<-2.2||(e<-1.2&&fs>6))?1:0;if(b)g=0;
+ // 4) stuck for ~2 s: back up with opposite lock, then drive on
+ AI.gr-=dt;AI.stk=(Math.abs(fs)<.6&&AI.t>2.5&&AI.gr<=0&&!AI.rec)?AI.stk+dt:0;
+ if(AI.stk>2.2){AI.rec=1.8;AI.stk=0;AI.rg=0}
+ if(AI.rec>0){AI.rec-=dt;if(!AI.rg){setSel('R');AI.rg=1}u=-(Math.abs(u)<.4?(al>=0?.6:-.6):u);g=.6;b=0;if(AI.rec<=0){AI.rec=0;setSel('D');AI.gr=2.5}}
+ else if(DR.sel==='R'&&DR.pend===null&&!(AI.ov&&AI.ov.gear==='R'))setSel('D');
+ AI.plan={steer:+u.toFixed(2),gas:+g.toFixed(1),brake:!!b,target_speed_ms:+vT.toFixed(1)};
+ // 5) Claude check-in every ~2 s (never overlaps a pending request)
+ if(AI.mode==='claude'){AI.ck+=dt;if(AI.ck>=2&&!AI.busy){AI.ck=0;let sn=null;try{sn=aiSnap(i,lt)}catch(e){aiNote('snapshot error - '+e.message,1)}if(sn)aiAsk(sn)}}
+ // 6) Claude's override (if any) replaces only the controls it named, for a short time
+ if(AI.ov){const o=AI.ov;if(AI.t<o.until){if(o.steer!=null)u=o.steer;if(o.gas!=null)g=Math.round(cl(o.gas,0,1)*5)/5;if(o.brake!=null){b=o.brake?1:0;if(b)g=0}if(o.gear&&!AI.ovg){setSel(o.gear);AI.ovg=1}}else{if(o.gear==='R')setSel('D');AI.ov=null}}
+ const on=!!(AI.ov&&AI.mode==='claude');cli.style.display=on?'block':'none';
+ if(on){const o=AI.ov;cli.textContent='\u{1F916} CLAUDE TAKES CONTROL: '+[o.steer!=null&&'steer',o.gas!=null&&'gas',o.brake!=null&&'brake',o.gear&&'gear '+o.gear].filter(Boolean).join(' + ')}
+ // 7) press the controls exactly like a human would (wheel angle, gas in fifths, brake)
+ wheelDeg=cl(-u*120,-120,120);keys.left=keys.right=0;keys.gas=Math.round(cl(g,0,1)*5)/5;keys.brake=b?1:0;
+ gasEl.classList.toggle('on',keys.gas>0);brkEl.classList.toggle('on',!!b)}
+// touching any control (keys, wheel, pedals) hands the truck back to the human; the top button / key I cycles You > Auto > Claude
+addEventListener('keydown',e=>{if(KM[e.code]&&AI.mode)aiSet('');if(e.code==='KeyI')aib.click()},true);
+document.addEventListener('pointerdown',e=>{if(AI.mode&&e.target.closest&&e.target.closest('.pb,#wheel'))aiSet('')},true);
+const aisb=document.getElementById('aisb'),SPN=['Slow','Medium','Fast'];aisb.textContent='AI: '+SPN[AI.spd];aisb.onclick=()=>{AI.spd=(AI.spd+1)%3;aisb.textContent='AI: '+SPN[AI.spd]};
+aib.onclick=()=>aiSet(AI.mode===''?'auto':'');
+if(MPG)aib.style.display=aisb.style.display='none';
+aiSet(window.__AI==='auto'||window.__AI==='claude'?window.__AI:'');
+// ---- race vs AI: 1-4 AI trucks (blue, yellow, green, pink). Kinematic, same lane/speed planner as the driver AI, each speeds up when behind you ----
+const NOPP=MPG?0:Math.max(0,Math.min(4,parseInt(window.__AIO)||0)),OM=NOPP?'auto':'';
+const OCOL=[0x1f5fe0,0xf2c500,0x1fa84a,0xf06aa8],OSK=[1,.95,1.04,.9],OOFF=[[2.8,4],[-2.8,4],[2.8,1],[-2.8,1]],OPS=[];
+for(let k=0;k<NOPP;k++){const m=carRoot.clone(true);
+ m.traverse(o=>{if(o.isMesh){o.material=Array.isArray(o.material)?o.material.map(x=>x.clone()):o.material.clone();(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>{if(x.color&&x.color.getHex()===0xd1101c)x.color.setHex(OCOL[k])})}});
+ S.add(m);OPS.push({k:k,m:m,x:0,z:0,h:0,v:0,off:0,ig:0,t:0,prog:0,fin:null,hit:0,lx:0,lz:0,fx:0,fz:0,sk:OSK[k]})}
+function oppPose(o){const n=NRM(o.x,o.z),up=new THREE.Vector3(n[0],n[1],n[2]),f=new THREE.Vector3(Math.sin(o.h),0,Math.cos(o.h)),l=new THREE.Vector3().crossVectors(up,f).normalize();f.crossVectors(l,up);
+ const pv=o.m.children[0];pv.position.set(o.x,HG(o.x,o.z)+1.1,o.z);pv.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(l,up,f))}
+function oppReset(){for(const o of OPS){const q=OOFF[o.k],i=q[1];o.t=0;o.off=q[0];o.ig=0;o.v=0;o.prog=0;o.fin=null;o.park=0;o.hit=0;o.lx=o.lz=0;o.fx=o.fz=0;
+ o.h=RA[i];o.x=RX[i]+Math.cos(RA[i])*q[0];o.z=RZ[i]-Math.sin(RA[i])*q[0];oppPose(o)}}
+function oppStep(o,dt){o.t+=dt;const i=near(o.x,o.z);if(i<0)return;
+ const ca=Math.cos(RA[i]),sa=Math.sin(RA[i]),lt=(o.x-RX[i])*ca-(o.z-RZ[i])*sa,v=o.v;
+ // lane choice: other trucks (and you, when collisions are on) count as obstacles
+ const Lc=cl(12+1.8*v,14,42),n=Math.ceil(Lc/2),lim=HW-2.1,ob=obs.filter(q=>Math.abs(q.x-o.x)<Lc+8&&Math.abs(q.z-o.z)<Lc+8&&roadD(q.x,q.z)<HW+3),
+  obl=ob.concat(OPS.filter(p=>p!==o).map(p=>({x:p.x,z:p.z,r:1.3})),CCOL?[{x:car.x,z:car.z,r:1.3}]:[]);
+ let best=0,bc=1e9;
+ for(let k=-4;k<=4;k++){const w=k*lim/4;let c=Math.abs(w-o.off)*.5+Math.abs(w)*.12;
+  for(const q of obl){let mn=99;for(let s=1;s<=n;s++){const j=Math.min(RN-1,i+s),d=Math.hypot(RX[j]+Math.cos(RA[j])*w-q.x,RZ[j]-Math.sin(RA[j])*w-q.z)-q.r-1.35;if(d<mn)mn=d}
+   c+=mn<0?500-mn*80:mn<3?(3-mn)*14:0}
+  if(c<bc){bc=c;best=w}}
+ if(o.fin!=null)best=(o.k%2?-1:1)*lim*(o.k<2?1:.55); // after finishing, pull over to the side
+ o.off+=cl(best-o.off,-4*dt,4*dt);
+ const Ld=cl(6+.8*v,7,20),jt=Math.min(RN-1,i+Math.round(Ld/2)),tx=RX[jt]+Math.cos(RA[jt])*o.off,tz=RZ[jt]-Math.sin(RA[jt])*o.off,
+  al=wrap(Math.atan2(tx-o.x,tz-o.z)-o.h),sl=Math.min(.38,30/Math.max(1,v*v));
+ const u=cl(Math.atan2(4.8*Math.sin(al),Ld)/sl,-1,1);
+ // speed: same limits as the driver AI times a catch-up boost that grows the further behind you it is (up to +60 % at 48 m)
+ let kx=0;for(let s=1;s<=14;s++){const a=Math.min(RN-1,i+s),b=Math.min(RN-1,i+s+2);kx=Math.max(kx,Math.abs(wrap(RA[b]-RA[a]))/4)}
+ const gap=(G.prog-o.prog)*RL,boost=1+cl(gap/80,0,.6),SQ=[[1,3.2],[1.3,3.8],[1.6,4.4]][AI.spd],vB=(14-1.6*LVI)*SQ[0]*o.sk;
+ let vT=cl(Math.min(vB,Math.sqrt(SQ[1]/Math.max(kx,.004)))*boost*(1-.3*Math.abs(u))*(bc>40?.7:1),4,vB*boost);if(o.fin!=null)vT=i>=RN-4?0:Math.min(vT,8); // after finishing: roll on slowly, stop near the end of the road
+ const e=vT-v;o.ig=cl(o.ig+e*dt*.3,-.2,.7);
+ let g=e>-.6?cl(.12+.18*e+o.ig,0,1):0,b=(e<-2.2||(e<-1.2&&v>6))?1:0;if(b)g=0;
+ // simple bicycle-model motion on the terrain
+ const dh=cl((H(o.x+Math.sin(o.h)*2,o.z+Math.cos(o.h)*2)-H(o.x,o.z))/2,-.6,.6);
+ o.v=Math.max(o.fin!=null?0:1.5,v+(3.8*g-.08*v-(b?8:0)-6.9*dh)*dt);if(o.fin!=null&&i>=RN-4){o.v*=Math.exp(-2.5*dt);if(o.v<.3){o.v=0;o.park=1}}
+ o.h+=o.v*Math.tan(u*sl)/2.4*dt;o.x+=Math.sin(o.h)*o.v*dt;o.z+=Math.cos(o.h)*o.v*dt;
+ // knock-back from a collision with you
+ if(o.fx||o.fz){const sh=Math.sin(o.h),ch=Math.cos(o.h),dx=o.fx/MASS,dz=o.fz/MASS,df=dx*sh+dz*ch;o.v=Math.max(1.5,o.v+df);o.lx+=dx-df*sh;o.lz+=dz-df*ch;o.fx=o.fz=0}
+ o.x+=o.lx*dt;o.z+=o.lz*dt;{const dk=Math.exp(-2.5*dt);o.lx*=dk;o.lz*=dk}
+ for(const q of ob){const dx=o.x-q.x,dz=o.z-q.z,d=Math.hypot(dx,dz),r=q.r+1.2;if(d<r){o.x=q.x+dx/(d||1)*r;o.z=q.z+dz/(d||1)*r;if(o.hit<=0){o.v*=.3;o.hit=.6}}}
+ o.hit-=dt;
+ const l2=(o.x-RX[i])*ca-(o.z-RZ[i])*sa;if(Math.abs(l2)>HW-1.1){const ex=l2-Math.sign(l2)*(HW-1.1);o.x-=ex*ca;o.z+=ex*sa;o.v*=.97}
+ o.prog=Math.max(o.prog,RS[i]/RL);
+ if(o.fin==null&&i>=RN-10&&Math.abs(lt)<HW){o.fin=G.t;if(G.state==='run'&&!OPS.some(p=>p!==o&&p.fin!=null)){mpSay('An AI truck finished!');setTimeout(()=>mpSay(''),2500)}}}
+function oppFrame(dt){if(!NOPP)return;
+ for(const o of OPS){if(G.state==='run'&&G.go&&!o.park)oppStep(o,dt);else o.fx=o.fz=0;oppPose(o)}
+ gtt.textContent+=' \u00b7 Pos '+(1+OPS.filter(o=>o.fin!=null||o.prog>G.prog).length)+'/'+(NOPP+1)}
+// ---- optional car-to-car collisions (two players / AI race): each other car is an oriented box; the player's body points get spring forces from it, like rocks ----
+const CCOL=!!window.__COL&&(MPG||NOPP>0);
+const OTH={on:0,list:[]};
+function colUpdate(){OTH.on=0;OTH.list=[];if(!CCOL)return;
+ if(MPG&&rm.has&&!rm.left){const f=new THREE.Vector3(0,0,1).applyQuaternion(rq);OTH.list.push({p:[rp.x,rp.y,rp.z],v:rm.v,h:Math.atan2(f.x,f.z),o:null})}
+ for(const o of OPS)OTH.list.push({p:[o.x,HG(o.x,o.z)+1.1,o.z],v:[Math.sin(o.h)*o.v+o.lx,0,Math.cos(o.h)*o.v+o.lz],h:o.h,o:o});
+ OTH.on=OTH.list.length>0}
+function carHit(P,vel,push){for(const c of OTH.list){const dx=P[0]-c.p[0],dz=P[2]-c.p[2];if(Math.abs(dx)>3.2||Math.abs(dz)>3.2||Math.abs(P[1]-c.p[1])>1.5)continue;
+ const sh=Math.sin(c.h),ch=Math.cos(c.h),lf=dx*sh+dz*ch,ls=dx*ch-dz*sh,pf=2.15-Math.abs(lf),ps=1.2-Math.abs(ls);if(pf<=0||ps<=0)continue;
+ let nx,nz,pen;if(pf<ps){const sg=lf>=0?1:-1;nx=sh*sg;nz=ch*sg;pen=pf}else{const sg=ls>=0?1:-1;nx=ch*sg;nz=-sh*sg;pen=ps}
+ const vp=vel(P),vn=(vp[0]-c.v[0])*nx+(vp[2]-c.v[2])*nz,Fn=Math.min(100000,90000*pen+(vn<0?-7000*vn:0));
+ push(P,[nx*Fn,0,nz*Fn]);if(c.o){c.o.fx-=nx*Fn*DT;c.o.fz-=nz*Fn*DT}}} // the reaction impulse goes to the AI truck
+// ---- minimap (race modes): road outline, you in red, AI trucks in their colours, the other player in blue ----
+const mmap=document.getElementById('mmap'),mmc=mmap.getContext('2d');let mmBase=null,mmT=0,mmOx=0,mmOy=0,mmSc=1,mmX1=0,mmZ1=0;
+const mmPx=x=>mmOx+(mmX1-x)*mmSc,mmPy=z=>mmOy+(mmZ1-z)*mmSc; // north (forward at the start) is up
+if(NOPP||MPG){mmap.style.display='block';
+ let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(let i=0;i<RN;i++){x0=Math.min(x0,RX[i]);x1=Math.max(x1,RX[i]);z0=Math.min(z0,RZ[i]);z1=Math.max(z1,RZ[i])}
+ const SZ=mmap.width,pad=18;mmSc=(SZ-2*pad)/Math.max(x1-x0,z1-z0,1);mmX1=x1;mmZ1=z1;mmOx=(SZ-(x1-x0)*mmSc)/2;mmOy=(SZ-(z1-z0)*mmSc)/2;
+ mmBase=document.createElement('canvas');mmBase.width=mmBase.height=SZ;const b=mmBase.getContext('2d');
+ b.lineJoin=b.lineCap='round';b.beginPath();for(let i=0;i<RN;i++){const X=mmPx(RX[i]),Y=mmPy(RZ[i]);i?b.lineTo(X,Y):b.moveTo(X,Y)}
+ b.strokeStyle='#000a';b.lineWidth=11;b.stroke();b.strokeStyle='#e2e2e2';b.lineWidth=7;b.stroke();
+ b.fillStyle='#2ecc40';b.beginPath();b.arc(mmPx(RX[SI]),mmPy(RZ[SI]),6,0,7);b.fill();
+ b.fillStyle='#fff';b.strokeStyle='#000';b.lineWidth=2;b.fillRect(mmPx(RX[RN-10])-5,mmPy(RZ[RN-10])-5,10,10);b.strokeRect(mmPx(RX[RN-10])-5,mmPy(RZ[RN-10])-5,10,10)}
+function mapFrame(dt){if(!mmBase)return;mmT+=dt;if(mmT<.1)return;mmT=0;
+ mmc.clearRect(0,0,mmap.width,mmap.height);mmc.drawImage(mmBase,0,0);
+ const dot=(x,z,c,r)=>{mmc.beginPath();mmc.arc(mmPx(x),mmPy(z),r,0,7);mmc.fillStyle=c;mmc.fill();mmc.lineWidth=2.5;mmc.strokeStyle='#fff';mmc.stroke()};
+ for(const o of OPS)dot(o.x,o.z,'#'+OCOL[o.k].toString(16).padStart(6,'0'),8);
+ if(MPG&&rm.has&&!rm.left)dot(rp.x,rp.z,'#3aa0ff',8);
+ dot(car.x,car.z,'#d1101c',9)}
 // ---- page glue ----
 const car={v:0,crash:false,x:0,y:0,z:0,h:0},msg=document.getElementById('msg'),tmk=document.getElementById('tilt').firstElementChild;
 const wrap=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
@@ -538,17 +721,17 @@ let acc=0,flipT=0,vPrev=[0,0,0],sndT=0,steer=0;
 function resetCar(x=SX,z=SZ,h=SH,up){// spawn tilted to the ground slope, wheels just above the surface (no drop onto a hillside)
  const n=NRM(x,z),fx=Math.sin(h),fz=Math.cos(h),dd=fx*n[0]+fz*n[2];let ez=[fx-dd*n[0],-dd*n[1],fz-dd*n[2]];const el=Math.hypot(ez[0],ez[1],ez[2]);ez=ez.map(v=>v/el);
  const ex=[n[1]*ez[2]-n[2]*ez[1],n[2]*ez[0]-n[0]*ez[2],n[0]*ez[1]-n[1]*ez[0]],sq=Math.sqrt(ex[0]+n[1]+ez[2]+1)*2;
- sim.p=[x,H(x,z)+1.1,z];sim.q=[(n[2]-ez[1])/sq,(ez[0]-ex[2])/sq,(ex[1]-n[0])/sq,sq/4];sim.v=[0,0,0];sim.w=[0,0,0];sim.ws=[0,0,0,0];vPrev=[0,0,0];steer=0;flipT=0;ch=h;DR.w=94;DR.pend=null;drvUpdate(DR.sel);gmReset();msg.style.display='none'}
+ sim.p=[x,H(x,z)+1.1,z];sim.q=[(n[2]-ez[1])/sq,(ez[0]-ex[2])/sq,(ex[1]-n[0])/sq,sq/4];sim.v=[0,0,0];sim.w=[0,0,0];sim.ws=[0,0,0,0];vPrev=[0,0,0];steer=0;flipT=0;ch=h;DR.w=94;DR.pend=null;drvUpdate(DR.sel);gmReset();aiReset();oppReset();msg.style.display='none'}
 function crashSnd(){if(!AC||muted||AC.state!=='running')return;const n=AC.sampleRate*.7|0,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);
  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.5);
  const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=900;const q=AC.createGain();q.gain.value=.6;s.connect(f);f.connect(q);q.connect(AC.destination);s.start()}
 function step(dt){
- if(wDrag===null)wheelDeg*=Math.exp(-7*dt);
+ aiFrame(dt);if(wDrag===null)wheelDeg*=Math.exp(-7*dt);
  wh.style.transform='rotate('+(wheelDeg+(keys.right-keys.left)*60)+'deg)';
  let Rm=matQ(sim.q);const fs=sim.v[0]*Rm[0][2]+sim.v[1]*Rm[1][2]+sim.v[2]*Rm[2][2];
  const lim=Math.min(.38,12/Math.max(1,fs*fs));
  steer+=(cl(keys.left-keys.right-wheelDeg/120,-1,1)*lim-steer)*Math.min(1,dt*6);
- drvFrame(dt);const inp={Tw:0,Tb:0,steer};
+ drvFrame(dt);colUpdate();const inp={Tw:0,Tb:0,steer};
  acc=Math.min(acc+dt,.05);while(acc>=DT){inp.Tw=drive(DT,wavg(),sim.N[0]+sim.N[1]+sim.N[2]+sim.N[3]>500,sim.slip);inp.Tb=DR.brk*BRKT;physStep(DT,inp);acc-=DT}
  Rm=matQ(sim.q);
  pivot.position.set(sim.p[0],sim.p[1],sim.p[2]);pivot.quaternion.set(sim.q[0],sim.q[1],sim.q[2],sim.q[3]);
@@ -556,7 +739,7 @@ function step(dt){
  const up=Rm[1][1],sp=Math.hypot(sim.v[0],sim.v[1],sim.v[2]);
  car.v=fs;car.crash=up<.35;car.x=sim.p[0];car.y=sim.p[1];car.z=sim.p[2];car.h=Math.atan2(Rm[0][2],Rm[2][2]);
  flipT=(up<.35&&sp<4)?flipT+dt:0;
- gameLogic(dt,up,sp);if(MPG)mpFrame(dt);
+ gameLogic(dt,up,sp);if(MPG)mpFrame(dt);oppFrame(dt);mapFrame(dt);
  const dv=Math.hypot(sim.v[0]-vPrev[0],sim.v[1]-vPrev[1],sim.v[2]-vPrev[2]);vPrev=sim.v.slice();sndT-=dt;if(dv>4)G.hit(dv);if(dv>5&&sndT<=0){crashSnd();sndT=.6}
  const Ls=sim.N[0]+sim.N[1],Rs=sim.N[2]+sim.N[3];tmk.style.left=(50-cl((Ls-Rs)/Math.max(1,Ls+Rs),-1,1)*50)+'%';
  document.getElementById('hud').firstChild.nodeValue=Math.round(sp*3.6)+' ';engine();dashUpdate(sp);
