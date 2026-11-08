@@ -84,7 +84,7 @@ let bdFrame=null;const menuEl0=document.getElementById('menu');
 function bdLaunch(sel,seed,mp,col){if(bdFrame)bdFrame.remove();bdFrame=document.createElement('iframe');
  bdFrame.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;z-index:30;background:#000';bdFrame.setAttribute('allow','autoplay');
  bdFrame.onload=()=>{try{bdFrame.contentWindow.focus()}catch(e){}};
- bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP=1;':'')+(AIM?'window.__AI="'+AIM+'";':'')+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
+ bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
  document.body.appendChild(bdFrame);menuEl0.style.display='none'}
 addEventListener('message',e=>{const d=e.data;if(!d||!d.bd)return;
  if(d.bd==='go')bdLaunch(d.sel);else if(d.bd==='net'&&bdFrame&&e.source===bdFrame.contentWindow)mpFromGame(d.m);
@@ -136,7 +136,7 @@ const toGame=m=>{try{bdFrame&&bdFrame.contentWindow.postMessage({bdnet:m},'*')}c
 function mpClose(){try{MP.dc&&MP.dc.close();MP.pc&&MP.pc.close();MP.peer&&MP.peer.destroy()}catch(e){}MP.pc=MP.dc=MP.peer=null;MP.rdy=0}
 function setDc(dc){MP.dc=dc;
  dc.onopen=()=>{mpStat('Connected!');if(MP.role==='host'){send({t:'start',sel:MP.sel,seed:MP.seed,col:COL});bdLaunch(MP.sel,MP.seed,1)}};
- dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t==='start')bdLaunch(m.sel,m.seed,1,m.col);else if(m.t==='ready'){MP.rdy|=2;chkGo()}else toGame(m)}}
+ dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t==='start')bdLaunch(m.sel,m.seed,2,m.col);else if(m.t==='ready'){MP.rdy|=2;chkGo()}else toGame(m)}}
 function chkGo(){if(MP.rdy===3){MP.rdy=0;send({t:'go'});toGame({t:'go'})}}
 function mpFromGame(m){if(m.t==='ready'&&MP.role==='host'){MP.rdy|=1;chkGo()}else send(m)}
 const mpShow=(id,v)=>{document.getElementById(id).style.display=v?'block':'none'};
@@ -729,7 +729,8 @@ function mapFrame(dt){if(!mmBase)return;mmT+=dt;if(mmT<.1)return;mmT=0;
 const car={v:0,crash:false,x:0,y:0,z:0,h:0},msg=document.getElementById('msg'),tmk=document.getElementById('tilt').firstElementChild;
 const wrap=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
 let acc=0,flipT=0,vPrev=[0,0,0],sndT=0,steer=0;
-function resetCar(x=SX,z=SZ,h=SH,up){// spawn tilted to the ground slope, wheels just above the surface (no drop onto a hillside)
+function resetCar(x=SX,z=SZ,h=SH,up){if(MPG&&arguments.length===0){const o=(window.__MP===2?1:-1)*2.4;x=SX+Math.cos(h)*o;z=SZ-Math.sin(h)*o} // two players: host starts on the right, joiner on the left
+// spawn tilted to the ground slope, wheels just above the surface (no drop onto a hillside)
  const n=NRM(x,z),fx=Math.sin(h),fz=Math.cos(h),dd=fx*n[0]+fz*n[2];let ez=[fx-dd*n[0],-dd*n[1],fz-dd*n[2]];const el=Math.hypot(ez[0],ez[1],ez[2]);ez=ez.map(v=>v/el);
  const ex=[n[1]*ez[2]-n[2]*ez[1],n[2]*ez[0]-n[0]*ez[2],n[0]*ez[1]-n[1]*ez[0]],sq=Math.sqrt(ex[0]+n[1]+ez[2]+1)*2;
  sim.p=[x,H(x,z)+1.1-LOW,z];sim.q=[(n[2]-ez[1])/sq,(ez[0]-ex[2])/sq,(ex[1]-n[0])/sq,sq/4];sim.v=[0,0,0];sim.w=[0,0,0];sim.ws=[0,0,0,0];vPrev=[0,0,0];steer=0;flipT=0;ch=h;DR.w=94;DR.pend=null;drvUpdate(DR.sel);gmReset();aiReset();oppReset();msg.style.display='none'}
