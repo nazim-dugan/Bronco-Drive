@@ -436,7 +436,7 @@ function physStep(dt,inp){
   push(Pc,v_add(v_mul(fd,fx-.015*N*Math.tanh(vl*2)),v_mul(ld,fy)));s.spin[k]=s.ws[k]*RWH;
  }
  push(s.p,v_mul(s.v,-.84*Math.hypot(s.v[0],s.v[1],s.v[2])));
- for(const b of CP){const P=v_add(s.p,rotB(b)),hg=HG(P[0],P[2]);
+ if(OTH.on)carHit2(push,vel);for(const b of CP){const P=v_add(s.p,rotB(b)),hg=HG(P[0],P[2]);
   if(P[1]<hg){const n=NRM(P[0],P[2]),vp=vel(P),vn=v_dot(vp,n),Fn=Math.min(90000,150000*(hg-P[1])+(vn<0?-6000*vn:0)),vt=v_sub(vp,v_mul(n,vn)),sp=Math.hypot(vt[0],vt[1],vt[2]);
    push(P,v_add(v_mul(n,Fn),v_mul(vt,-Math.min(.7*Fn/(sp+.02),30000))))}
   fence(P,hg,vel,push);for(const o of obs){const dx=P[0]-o.x,dz=P[2]-o.z;if(Math.abs(dx)>3||Math.abs(dz)>3)continue;
@@ -609,7 +609,7 @@ function aiFrame(dt){
  const SP0=[3,3.8,4.6][AI.spd];AI.off+=cl(best-AI.off,-SP0*dt,SP0*dt);
  // 2) steering: pure pursuit towards a point on the chosen lane (u: +1 = full left, -1 = full right)
  const Ld=cl(6+.8*Math.max(0,fs),7,20),jt=Math.min(RN-1,i+Math.round(Ld/2)),tx=RX[jt]+Math.cos(RA[jt])*AI.off,tz=RZ[jt]-Math.sin(RA[jt])*AI.off,
-  al=wrap(Math.atan2(tx-car.x,tz-car.z)-car.h),sl=Math.min(.38,12/Math.max(1,fs*fs));
+  al=wrap(Math.atan2(tx-car.x,tz-car.z)-car.h),sl=Math.min(.38,16/Math.max(1,fs*fs));
  let u=cl(Math.atan2(4.8*Math.sin(al),Ld)/sl,-1,1);
  // 3) speed: slow for bends, side slopes, tight steering and crowded lanes; small PI term for hills
  let kx=0;for(let s=1;s<=14;s++){const a=Math.min(RN-1,i+s),b=Math.min(RN-1,i+s+2);kx=Math.max(kx,Math.abs(wrap(RA[b]-RA[a]))/4)}
@@ -673,7 +673,7 @@ function oppStep(o,dt){o.t+=dt;const i=near(o.x,o.z);if(i<0)return;
  if(o.fin!=null)best=(o.k%2?-1:1)*lim*(o.k<2?1:.55); // after finishing, pull over to the side
  o.off+=cl(best-o.off,-4*dt,4*dt);
  const Ld=cl(6+.8*v,7,20),jt=Math.min(RN-1,i+Math.round(Ld/2)),tx=RX[jt]+Math.cos(RA[jt])*o.off,tz=RZ[jt]-Math.sin(RA[jt])*o.off,
-  al=wrap(Math.atan2(tx-o.x,tz-o.z)-o.h),sl=Math.min(.38,12/Math.max(1,v*v));
+  al=wrap(Math.atan2(tx-o.x,tz-o.z)-o.h),sl=Math.min(.38,16/Math.max(1,v*v));
  const u=cl(Math.atan2(4.8*Math.sin(al),Ld)/sl,-1,1);
  // speed: same limits as the driver AI times a catch-up boost that grows the further behind you it is (up to +60 % at 48 m)
  let kx=0;for(let s=1;s<=14;s++){const a=Math.min(RN-1,i+s),b=Math.min(RN-1,i+s+2);kx=Math.max(kx,Math.abs(wrap(RA[b]-RA[a]))/4)}
@@ -693,8 +693,14 @@ function oppStep(o,dt){o.t+=dt;const i=near(o.x,o.z);if(i<0)return;
  const l2=(o.x-RX[i])*ca-(o.z-RZ[i])*sa;if(Math.abs(l2)>HW-1.1){const ex=l2-Math.sign(l2)*(HW-1.1);o.x-=ex*ca;o.z+=ex*sa;o.v*=.97}
  o.prog=Math.max(o.prog,RS[i]/RL);
  if(o.fin==null&&i>=RN-10&&Math.abs(lt)<HW){o.fin=G.t;if(G.state==='run'&&!OPS.some(p=>p!==o&&p.fin!=null)){mpSay('An AI truck finished!');setTimeout(()=>mpSay(''),2500)}}}
+// ---- keep trucks apart: AI trucks never stay inside you or each other (3 circles per truck), and the player's physics also tests the other truck's corners against your body ----
+function circ(x,z,h){const sh=Math.sin(h),ch=Math.cos(h);return[-1.2,0,1.2].map(d=>[x+sh*d,z+ch*d])}
+function worst(ax,az,ah,bx,bz,bh){const A=circ(ax,az,ah),B=circ(bx,bz,bh);let best=null,m=0;for(const a of A)for(const b of B){const dx=a[0]-b[0],dz=a[1]-b[1],d=Math.hypot(dx,dz),ov=2.2-d;if(ov>m){m=ov;best=[dx/(d||1),dz/(d||1),ov]}}return best}
+function oppSeparate(){
+ if(CCOL)for(const o of OPS){const w=worst(o.x,o.z,o.h,car.x,car.z,car.h);if(w){o.x+=w[0]*(w[2]+.02);o.z+=w[1]*(w[2]+.02)}}
+ for(let i=0;i<OPS.length;i++)for(let j=i+1;j<OPS.length;j++){const a=OPS[i],b=OPS[j],w=worst(a.x,a.z,a.h,b.x,b.z,b.h);if(w){const m=(w[2]+.02)/2;a.x+=w[0]*m;a.z+=w[1]*m;b.x-=w[0]*m;b.z-=w[1]*m}}}
 function oppFrame(dt){if(!NOPP)return;
- for(const o of OPS){if(G.state==='run'&&G.go&&!o.park)oppStep(o,dt);else o.fx=o.fz=0;oppPose(o,dt)}
+ for(const o of OPS){if(G.state==='run'&&G.go&&!o.park)oppStep(o,dt);else o.fx=o.fz=0}oppSeparate();for(const o of OPS)oppPose(o,dt);
  gtt.textContent+=' \u00b7 Pos '+(1+OPS.filter(o=>o.fin!=null||o.prog>G.prog).length)+'/'+(NOPP+1)}
 // ---- optional car-to-car collisions (two players / AI race): each other car is an oriented box; the player's body points get spring forces from it, like rocks ----
 const CCOL=!!window.__COL&&(MPG||NOPP>0);
@@ -708,6 +714,14 @@ function carHit(P,vel,push){for(const c of OTH.list){const dx=P[0]-c.p[0],dz=P[2
  let nx,nz,pen;if(pf<ps){const sg=lf>=0?1:-1;nx=sh*sg;nz=ch*sg;pen=pf}else{const sg=ls>=0?1:-1;nx=ch*sg;nz=-sh*sg;pen=ps}
  const vp=vel(P),vn=(vp[0]-c.v[0])*nx+(vp[2]-c.v[2])*nz,Fn=Math.min(100000,90000*pen+(vn<0?-7000*vn:0));
  push(P,[nx*Fn,0,nz*Fn]);if(c.o){c.o.fx-=nx*Fn*DT;c.o.fz-=nz*Fn*DT}}} // the reaction impulse goes to the AI truck
+function carHit2(push,vel){const R=matQ(sim.q),hl=Math.hypot(R[0][2],R[2][2])||1,sp=R[0][2]/hl,cp=R[2][2]/hl;
+ for(const c of OTH.list){const sh=Math.sin(c.h),ch=Math.cos(c.h);
+  for(const q of [[1.05,2.1],[-1.05,2.1],[1.05,-2.1],[-1.05,-2.1],[1.05,0],[-1.05,0],[0,2.1],[0,-2.1]]){ // corners and edge midpoints of the other truck
+   const Q=[c.p[0]+q[0]*ch+q[1]*sh,c.p[1],c.p[2]-q[0]*sh+q[1]*ch],dx=Q[0]-sim.p[0],dz=Q[2]-sim.p[2];if(Math.abs(Q[1]-sim.p[1])>1.4)continue;
+   const lf=dx*sp+dz*cp,ls=dx*cp-dz*sp,pf=2.15-Math.abs(lf),ps=1.2-Math.abs(ls);if(pf<=0||ps<=0)continue;
+   let ex,ez,pen;if(pf<ps){const g=lf>=0?1:-1;ex=sp*g;ez=cp*g;pen=pf}else{const g=ls>=0?1:-1;ex=cp*g;ez=-sp*g;pen=ps}
+   const vp=vel(Q),ap=Math.max(0,(vp[0]-c.v[0])*ex+(vp[2]-c.v[2])*ez),Fn=Math.min(100000,70000*pen+7000*ap);
+   push(Q,[-ex*Fn,0,-ez*Fn]);if(c.o){c.o.fx+=ex*Fn*DT;c.o.fz+=ez*Fn*DT}}}}
 // ---- minimap (race modes): road outline, you in red, AI trucks in their colours, the other player in blue ----
 const mmap=document.getElementById('mmap'),mmc=mmap.getContext('2d');let mmBase=null,mmT=0,mmOx=0,mmOy=0,mmSc=1,mmX1=0,mmZ1=0;
 const mmPx=x=>mmOx+(mmX1-x)*mmSc,mmPy=z=>mmOy+(mmZ1-z)*mmSc; // north (forward at the start) is up
@@ -741,7 +755,7 @@ function step(dt){
  aiFrame(dt);if(wDrag===null)wheelDeg*=Math.exp(-7*dt);
  wh.style.transform='rotate('+(wheelDeg+(keys.right-keys.left)*60)+'deg)';
  let Rm=matQ(sim.q);const fs=sim.v[0]*Rm[0][2]+sim.v[1]*Rm[1][2]+sim.v[2]*Rm[2][2];
- const lim=Math.min(.38,12/Math.max(1,fs*fs));
+ const lim=Math.min(.38,16/Math.max(1,fs*fs)); // steering lock shrinks with speed (a bit more than before: 16/v^2 instead of 12/v^2), for wheel and keys alike
  steer+=(cl(keys.left-keys.right-wheelDeg/120,-1,1)*lim-steer)*Math.min(1,dt*6);
  drvFrame(dt);colUpdate();const inp={Tw:0,Tb:0,steer};
  acc=Math.min(acc+dt,.05);const ha=1+cl((Math.asin(cl(Rm[1][2],-1,1))-.2)*2.5,0,.7)*(fs<7?1:.5);while(acc>=DT){inp.Tw=drive(DT,wavg(),sim.N[0]+sim.N[1]+sim.N[2]+sim.N[3]>500,sim.slip)*ha;inp.Tb=DR.brk*BRKT;physStep(DT,inp);acc-=DT}
