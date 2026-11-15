@@ -61,6 +61,7 @@ html:not(.wheelmode) #wheel{display:none}html.wheelmode #stick{display:none}
 .top{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 130px)}
 #cli{position:fixed;top:calc(86px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#ff9f1c;color:#000;font:700 14px system-ui,sans-serif;padding:6px 14px;border-radius:20px;box-shadow:0 0 16px #ff9f1c;display:none;pointer-events:none;white-space:nowrap;animation:clp .7s infinite alternate}@keyframes clp{to{opacity:.6}}
 #oac{position:fixed;top:calc(98px + env(safe-area-inset-top,0px));left:12px;max-width:62vw;color:#fff;font:13px system-ui,sans-serif;text-shadow:0 1px 3px #000a;display:none;pointer-events:none}
+#grp{width:min(46vw,170px);vertical-align:middle;accent-color:#d1101c}
 #aim button.on,#adr button.on,#aip button.on,#aio button.on,#acol button.on{background:#4cc3ff;color:#000}
 #aic{position:fixed;top:calc(78px + env(safe-area-inset-top,0px));left:12px;max-width:62vw;color:#fff;font:13px system-ui,sans-serif;text-shadow:0 1px 3px #000a;display:none;pointer-events:none}
 </style></head><body>
@@ -72,6 +73,7 @@ html:not(.wheelmode) #wheel{display:none}html.wheelmode #stick{display:none}
 <div class="rnd" id="aio">Race vs AI (opponents): <button data-o="">Off</button><button data-o="1">1</button><button data-o="2">2</button><button data-o="3">3</button><button data-o="4">4</button></div>
 <div class="rnd" id="acol">Car collisions (2 players, AI race): <button data-c="0">Off</button><button data-c="1">On</button></div>
 <div class="rnd" id="adr">Drivetrain: <button data-d="rwd">RWD</button><button data-d="fwd">FWD</button><button data-d="awd">AWD</button></div>
+<div class="rnd" id="agr">Wheel grip: <input type="range" id="grp" min="50" max="150" step="5" value="100" aria-label="Wheel grip"> <span id="grv">100%</span></div>
 <div class="rnd" id="aip">AI speed: <button data-p="0">Slow</button><button data-p="1">Medium</button><button data-p="2">Fast</button></div>
 <div class="rnd"><button id="mp2">👥 Two players (WiFi)</button></div>
 <div id="mpp" style="display:none;margin-top:10px;text-align:left"><div id="mpa"><select id="mpl"><option value="L1">1 · Sunny Meadow</option><option value="L2">2 · Rolling Hills</option><option value="L3">3 · Ridge Trail</option><option value="L4">4 · Rocky Climb</option><option value="L5">5 · Mountain Pass</option><option value="R2">Random path</option></select>
@@ -92,7 +94,7 @@ let bdFrame=null;const menuEl0=document.getElementById('menu');
 function bdLaunch(sel,seed,mp,col){if(bdFrame)bdFrame.remove();bdFrame=document.createElement('iframe');
  bdFrame.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;z-index:30;background:#000';bdFrame.setAttribute('allow','autoplay');
  bdFrame.onload=()=>{try{bdFrame.contentWindow.focus()}catch(e){}};
- bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+(DRVM?'window.__DRV="'+DRVM+'";':'')+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
+ bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+(DRVM?'window.__DRV="'+DRVM+'";':'')+'window.__GRIP='+GRIPV+';'+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
  document.body.appendChild(bdFrame);menuEl0.style.display='none'}
 addEventListener('message',e=>{const d=e.data;if(!d||!d.bd)return;
  if(d.bd==='go')bdLaunch(d.sel);else if(d.bd==='net'&&bdFrame&&e.source===bdFrame.contentWindow)mpFromGame(d.m);
@@ -110,6 +112,9 @@ document.querySelectorAll('#aim button').forEach(b=>b.onclick=()=>{AIM=b.dataset
 let DRVM='awd';try{DRVM=localStorage.getItem('bd-drive')||'awd'}catch(e){}
 function drShow(){document.querySelectorAll('#adr button').forEach(b=>b.classList.toggle('on',b.dataset.d===DRVM))}
 document.querySelectorAll('#adr button').forEach(b=>b.onclick=()=>{DRVM=b.dataset.d;try{localStorage.setItem('bd-drive',DRVM)}catch(e){}drShow()});drShow();
+let GRIPV=100;try{GRIPV=+localStorage.getItem('bd-grip')||100}catch(e){}
+const grp=document.getElementById('grp'),grv=document.getElementById('grv');grp.value=GRIPV;grv.textContent=GRIPV+'%';
+grp.oninput=()=>{GRIPV=+grp.value;grv.textContent=GRIPV+'%';try{localStorage.setItem('bd-grip',GRIPV)}catch(e){}};
 let AIP=0;try{AIP=+localStorage.getItem('bd-aip')||0}catch(e){}
 function aipShow(){document.querySelectorAll('#aip button').forEach(b=>b.classList.toggle('on',+b.dataset.p===AIP))}
 document.querySelectorAll('#aip button').forEach(b=>b.onclick=()=>{AIP=+b.dataset.p;try{localStorage.setItem('bd-aip',AIP)}catch(e){}aipShow()});aipShow();
@@ -511,13 +516,13 @@ function physStep(dt,inp){
  s.slip=0;
  const spdHoriz=Math.hypot(s.v[0],s.v[2]);
  const lowSpdLaunch=cl((DR.gas-.55)/.45,0,1)*(1-cl((spdHoriz-3)/13,0,1));
- const FWDm=window.__DRV==='fwd',RWDm=window.__DRV==='rwd',AWDm=!FWDm&&!RWDm;
+ const GM=(window.__GRIP||100)/100,FWDm=window.__DRV==='fwd',RWDm=window.__DRV==='rwd',AWDm=!FWDm&&!RWDm;
  let Wgt=WP.map((wp,k)=>FWDm?(wp[1]>0?s.N[k]:0):RWDm?(wp[1]<0?s.N[k]:0):s.N[k]);
  let TwE=inp.Tw;
  if(AWDm){ // traction-aware AWD: each wheel's share = grip it still has left after cornering (friction circle), reduced if it is already slipping;
   // total drive torque is capped to what the four tyres can transmit, so the truck accelerates without wheelspin/sliding
   s.aw=s.aw||[0,0,0,0];s.fyP=s.fyP||[0,0,0,0];
-  const cap=WP.map((wp,k)=>{const lm=MU*s.N[k],fl=s.fyP[k],c=Math.sqrt(Math.max(0,lm*lm-fl*fl*.9));return c*(1-cl((s.wSlip[k]-.15)/.45,0,.8))});
+  const cap=WP.map((wp,k)=>{const lm=MU*GM*s.N[k],fl=s.fyP[k],c=Math.sqrt(Math.max(0,lm*lm-fl*fl*.9));return c*(1-cl((s.wSlip[k]-.15)/.45,0,.8))});
   for(let k=0;k<4;k++){s.aw[k]+=(cap[k]-s.aw[k])*Math.min(1,dt*18);Wgt[k]=s.aw[k]}
   const cs=Wgt[0]+Wgt[1]+Wgt[2]+Wgt[3];if(cs>1)TwE=Math.sign(inp.Tw)*Math.min(Math.abs(inp.Tw),cs*RWH*.9);
  }
@@ -536,7 +541,7 @@ function physStep(dt,inp){
    Tn=TwE*Wgt[k]/Wt-Math.sign(ww)*Math.min(inp.Tb,Math.abs(ww)*IWH/dt);
   let fx=((ww*RWH-vl)/dt+Tn*RWH/IWH)/(RWH*RWH/IWH+ie)*.95,fy=-vs/(eff(rr_,ld)*4*dt)*.95;
   const launchGripDrop=lowSpdLaunch*(isRear?.42:FWDm?.02:.22);
-  const lim=MU*N*(1-launchGripDrop)*(FWDm&&!isRear?1.35:1),lx=lim*(1+1.25*cl((Math.sqrt(Math.max(0,1-n[1]*n[1]))/Math.max(.3,n[1])-.3)/.6,0,1));
+  const lim=MU*GM*N*(1-launchGripDrop)*(FWDm&&!isRear?1.35:1),lx=lim*(1+1.25*cl((Math.sqrt(Math.max(0,1-n[1]*n[1]))/Math.max(.3,n[1])-.3)/.6,0,1));
   const spinExcess=Math.max(0,Math.abs(ww*RWH-vl)-1.4);
   const latGripMult=(1.15-0.82*cl(spinExcess/5.5,0,1))*(isRear?1-lowSpdLaunch*.32:1);
   const ly=Math.max(lim*.22,lim*latGripMult);
