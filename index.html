@@ -599,7 +599,7 @@ function physStep(dt,inp){
 }
 
 // ---- drivetrain: engine → clutch → gearbox → wheels ----
-const GEARS=[0,3.6,2.2,1.55,1.15,.92,.75],FDR=5.9,RWH=.46,IWH=3,BRKT=1840,JENG=.22,RVR=-3.4,TCM=480,TCK=.0022,TR0=2.2,SRC=.85,FR0=25,FR1=.025,FR2=.06;
+const GEARS=[0,3.6,2.2,1.55,1.15,.92,.75],FDR=5.9,RWH=.46,IWH=3,BRKT=1840,JENG=.22,RVR=-3.4,TCM=480,TCK=.0040,TR0=1.6,SRC=.85,FR0=25,FR1=.025,FR2=.06;
 const DR={w:94,sel:'N',pend:null,gn:1,gas:0,brk:0,idleI:.12,ramp:1,cut:false,cool:0,Te:0,Tc:0,Tw:0,eng:0,thr:0};
 const sstep=x=>{x=cl(x,0,1);return x*x*(3-2*x)},Tmax=w=>Math.max(60,340*(1-(((w*9.549)-4200)/4500)**2));
 const curG=()=>DR.sel==='R'?RVR:DR.sel==='N'?0:DR.sel==='D'?GEARS[DR.gn]:GEARS[DR.sel];
