@@ -444,7 +444,7 @@ addEventListener('keyup',e=>{if(KM[e.code])keys[KM[e.code]]=0});
 const V=[{n:'Chase',d:9,h:3.6,f:62},{n:'Far chase',d:17,h:8,f:55},{n:'Top-down',d:3,h:32,f:50},{n:'Cockpit',f:78},{n:'Road view',f:78}];
 let vi=1,cockDy=0,ch=0,yawO=0,pitO=0,zoom=1;
 // front-corner view (Far chase only): after a sudden slow-down (hit/brake) below FC_STOP km/h the camera swings to the front corner; returns when the car drives forward again (stays while reversing)
-const FC_STOP=5,FC_GO=7,FC_FAST=12,FC_WIN=6,FC_ANG=2.3;let fcOn=0,fc=0,fcPk=99; // fcPk = seconds since the car last went faster than FC_FAST km/h
+const FC_STOP=5,FC_GO=7,FC_FAST=12,FC_WIN=6,FC_ANG=2.3;let fcOn=0,fc=0,fcPk=99,CSA=0; // fcPk = seconds since the car last went faster than FC_FAST km/h
 const vb=document.getElementById('view');
 function nextView(){vi=(vi+1)%V.length;fcOn=0;fcPk=99;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;yawO=pitO=0}
 vb.onclick=nextView;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;
@@ -547,7 +547,7 @@ function physStep(dt,inp){
   const launchGripDrop=lowSpdLaunch*(isRear?.42:FWDm?.02:.22);
   const lim=MU*GM*N*(1-launchGripDrop)*(FWDm&&!isRear?1.35:1),lx=lim*(1+1.25*cl((Math.sqrt(Math.max(0,1-n[1]*n[1]))/Math.max(.3,n[1])-.3)/.6,0,1));
   const spinExcess=Math.max(0,Math.abs(ww*RWH-vl)-1.4);
-  const latGripMult=(1.15-0.82*cl(spinExcess/5.5,0,1))*(isRear?1-lowSpdLaunch*.32:1);
+  const latGripMult=(1.15-0.82*(1-.55*CSA)*cl(spinExcess/5.5,0,1))*(isRear?1-lowSpdLaunch*.32:1);
   const ly=Math.max(lim*.22,lim*latGripMult);
   if(Math.abs(fx)>lx)fx=Math.sign(fx)*lx*.76;
   const el=Math.hypot(fx/lx,fy/ly);if(el>1){fx/=el;fy/=el}
@@ -868,8 +868,12 @@ function step(dt){
   const hf=(sk.clientWidth-sknob.offsetWidth)/2,kv=sDrag!==null||stickV!==0?stickV:cl(-wheelDeg/120*-1,-1,1);sknob.style.transform='translateX('+(kv*hf+(keys.right-keys.left)*hf*.5)+'px)'}
  wh.style.transform='rotate('+(wheelDeg+(keys.right-keys.left)*60)+'deg)';
  let Rm=matQ(sim.q);const fs=sim.v[0]*Rm[0][2]+sim.v[1]*Rm[1][2]+sim.v[2]*Rm[2][2];
- const lim=Math.min(.38,26*(window.__GRIP||100)/100/Math.max(1,fs*fs)); // high-speed steering cap (was 16): lateral accel limit ~ cap/wheelbase, scales with the Wheel grip slider
- steer+=(cl(keys.left-keys.right-wheelDeg/120,-1,1)*lim-steer)*Math.min(1,dt*6);
+ const lim0=Math.min(.38,26*(window.__GRIP||100)/100/Math.max(1,fs*fs)); // high-speed steering cap (was 16): lateral accel limit ~ cap/wheelbase, scales with the Wheel grip slider
+ // counter-steer assist: when the car slides sideways and you steer toward the direction it is moving, allow enough lock to catch the slide (the speed cap alone is too small for that), steer faster, and let the tyres keep more side grip despite wheelspin
+ const tg=cl(keys.left-keys.right-wheelDeg/120,-1,1),vlat=sim.v[0]*Rm[0][0]+sim.v[1]*Rm[1][0]+sim.v[2]*Rm[2][0],sa=Math.atan2(Math.abs(vlat),Math.max(1,Math.abs(fs))),cso=Math.hypot(sim.v[0],sim.v[2])>3&&tg*vlat>0&&sa>.1;
+ CSA=cso?cl((sa-.1)/.25,0,1)*Math.min(1,Math.abs(tg)*2):0;
+ const lim=cso?Math.max(lim0,Math.min(.38,sa*1.15)):lim0;
+ steer+=(tg*lim-steer)*Math.min(1,dt*(cso?10:6));
  drvFrame(dt);colUpdate();const inp={Tw:0,Tb:0,steer};
  acc=Math.min(acc+dt,.05);const ha=1+cl((Math.asin(cl(Rm[1][2],-1,1))-.2)*2.5,0,.7)*(fs<7?1:.5);while(acc>=DT){inp.Tw=drive(DT,wavg(),sim.N[0]+sim.N[1]+sim.N[2]+sim.N[3]>500,sim.slip)*ha;inp.Tb=DR.brk*BRKT;physStep(DT,inp);acc-=DT}
  Rm=matQ(sim.q);
