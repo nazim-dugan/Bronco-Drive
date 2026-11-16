@@ -62,7 +62,7 @@ html:not(.wheelmode) #wheel{display:none}html.wheelmode #stick{display:none}
 #cli{position:fixed;top:calc(86px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#ff9f1c;color:#000;font:700 14px system-ui,sans-serif;padding:6px 14px;border-radius:20px;box-shadow:0 0 16px #ff9f1c;display:none;pointer-events:none;white-space:nowrap;animation:clp .7s infinite alternate}@keyframes clp{to{opacity:.6}}
 #oac{position:fixed;top:calc(98px + env(safe-area-inset-top,0px));left:12px;max-width:62vw;color:#fff;font:13px system-ui,sans-serif;text-shadow:0 1px 3px #000a;display:none;pointer-events:none}
 #grp{width:min(46vw,170px);vertical-align:middle;accent-color:#d1101c}
-#aim button.on,#adr button.on,#aip button.on,#aio button.on,#acol button.on{background:#4cc3ff;color:#000}
+#aim button.on,#adr button.on,#avb button.on,#aip button.on,#aio button.on,#acol button.on{background:#4cc3ff;color:#000}
 #aic{position:fixed;top:calc(78px + env(safe-area-inset-top,0px));left:12px;max-width:62vw;color:#fff;font:13px system-ui,sans-serif;text-shadow:0 1px 3px #000a;display:none;pointer-events:none}
 </style></head><body>
 <canvas id="c"></canvas>
@@ -73,6 +73,7 @@ html:not(.wheelmode) #wheel{display:none}html.wheelmode #stick{display:none}
 <div class="rnd" id="aio">Race vs AI (opponents): <button data-o="">Off</button><button data-o="1">1</button><button data-o="2">2</button><button data-o="3">3</button><button data-o="4">4</button></div>
 <div class="rnd" id="acol">Car collisions (2 players, AI race): <button data-c="0">Off</button><button data-c="1">On</button></div>
 <div class="rnd" id="adr">Drivetrain: <button data-d="rwd">RWD</button><button data-d="fwd">FWD</button><button data-d="awd">AWD</button></div>
+<div class="rnd" id="avb">Vibration: <button data-v="1">On</button><button data-v="0">Off</button></div>
 <div class="rnd" id="agr">Wheel grip: <input type="range" id="grp" min="50" max="150" step="5" value="100" aria-label="Wheel grip"> <span id="grv">100%</span></div>
 <div class="rnd" id="aip">AI speed: <button data-p="0">Slow</button><button data-p="1">Medium</button><button data-p="2">Fast</button></div>
 <div class="rnd"><button id="mp2">👥 Two players (WiFi)</button></div>
@@ -94,7 +95,7 @@ let bdFrame=null;const menuEl0=document.getElementById('menu');
 function bdLaunch(sel,seed,mp,col){if(bdFrame)bdFrame.remove();bdFrame=document.createElement('iframe');
  bdFrame.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;z-index:30;background:#000';bdFrame.setAttribute('allow','autoplay');
  bdFrame.onload=()=>{try{bdFrame.contentWindow.focus()}catch(e){}};
- bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+(DRVM?'window.__DRV="'+DRVM+'";':'')+'window.__GRIP='+GRIPV+';'+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
+ bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+(DRVM?'window.__DRV="'+DRVM+'";':'')+'window.__GRIP='+GRIPV+';window.__VIB="'+VIBV+'";'+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
  document.body.appendChild(bdFrame);menuEl0.style.display='none'}
 addEventListener('message',e=>{const d=e.data;if(!d||!d.bd)return;
  if(d.bd==='go')bdLaunch(d.sel);else if(d.bd==='net'&&bdFrame&&e.source===bdFrame.contentWindow)mpFromGame(d.m);
@@ -112,6 +113,9 @@ document.querySelectorAll('#aim button').forEach(b=>b.onclick=()=>{AIM=b.dataset
 let DRVM='awd';try{DRVM=localStorage.getItem('bd-drive')||'awd'}catch(e){}
 function drShow(){document.querySelectorAll('#adr button').forEach(b=>b.classList.toggle('on',b.dataset.d===DRVM))}
 document.querySelectorAll('#adr button').forEach(b=>b.onclick=()=>{DRVM=b.dataset.d;try{localStorage.setItem('bd-drive',DRVM)}catch(e){}drShow()});drShow();
+let VIBV='1';try{VIBV=localStorage.getItem('bd-vib')==='0'?'0':'1'}catch(e){}
+function vbShow(){document.querySelectorAll('#avb button').forEach(b=>b.classList.toggle('on',b.dataset.v===VIBV))}
+document.querySelectorAll('#avb button').forEach(b=>b.onclick=()=>{VIBV=b.dataset.v;try{localStorage.setItem('bd-vib',VIBV)}catch(e){}vbShow();if(VIBV==='1'){try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}}});vbShow();
 let GRIPV=100;try{GRIPV=+localStorage.getItem('bd-grip')||100}catch(e){}
 const grp=document.getElementById('grp'),grv=document.getElementById('grv');grp.value=GRIPV;grv.textContent=GRIPV+'%';
 grp.oninput=()=>{GRIPV=+grp.value;grv.textContent=GRIPV+'%';try{localStorage.setItem('bd-grip',GRIPV)}catch(e){}};
@@ -870,7 +874,8 @@ function mapFrame(dt){if(!mmBase)return;mmT+=dt;if(mmT<.1)return;mmT=0;
 // ---- page glue ----
 const car={v:0,crash:false,x:0,y:0,z:0,h:0},msg=document.getElementById('msg'),tmk=document.getElementById('tilt').firstElementChild;
 const wrap=a=>((a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
-let acc=0,flipT=0,vPrev=[0,0,0],sndT=0,steer=0;
+let acc=0,flipT=0,vPrev=[0,0,0],sndT=0,steer=0,vbS=0;
+const VIBE=window.__VIB!=='0'&&typeof navigator.vibrate==='function',hap=p=>{try{navigator.vibrate(p)}catch(e){}}; // phone vibration: bump on impacts, buzz while the tyres slip
 function resetCar(x=SX,z=SZ,h=SH,up){if(MPG&&arguments.length===0){const o=(window.__MP===2?1:-1)*2.4;x=SX+Math.cos(h)*o;z=SZ-Math.sin(h)*o}
  const n=NRM(x,z),fx=Math.sin(h),fz=Math.cos(h),dd=fx*n[0]+fz*n[2];let ez=[fx-dd*n[0],-dd*n[1],fz-dd*n[2]];const el=Math.hypot(ez[0],ez[1],ez[2]);ez=ez.map(v=>v/el);
  const ex=[n[1]*ez[2]-n[2]*ez[1],n[2]*ez[0]-n[0]*ez[2],n[0]*ez[1]-n[1]*ez[0]],sq=Math.sqrt(ex[0]+n[1]+ez[2]+1)*2;
@@ -921,6 +926,7 @@ function step(dt){
  flipT=(up<.35&&sp<4)?flipT+dt:0;
  gameLogic(dt,up,sp);if(MPG)mpFrame(dt);oppFrame(dt);mapFrame(dt);
  const dv=Math.hypot(sim.v[0]-vPrev[0],sim.v[1]-vPrev[1],sim.v[2]-vPrev[2]);vPrev=sim.v.slice();sndT-=dt;if(dv>4)G.hit(dv);if(dv>5&&sndT<=0){crashSnd();sndT=.6}
+ vbS-=dt;if(VIBE&&G.state==='run'){if(dv>3.5)hap(Math.round(Math.min(240,30+dv*16)));else if(vbS<=0){const sl=cl((sim.slip-.28)/1.1,0,1);if(sl>.04){hap(Math.round(10+30*sl));vbS=.1}}}
  const Ls=sim.N[0]+sim.N[1],Rs=sim.N[2]+sim.N[3];tmk.style.left=(50-cl((Ls-Rs)/Math.max(1,Ls+Rs),-1,1)*50)+'%';
  document.getElementById('hud').firstChild.nodeValue=Math.round(sp*3.6)+' ';engine();dashUpdate(sp);
 }
