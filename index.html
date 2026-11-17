@@ -70,7 +70,7 @@ html:not(.wheelmode) #wheel{display:none}html.wheelmode #stick{display:none}
 <div class="top"><button id="mute" aria-label="Toggle sound">🔊</button><button id="aib">&#129489; You</button><button id="aisb">AI: Slow</button><button id="stb">Steer: Stick</button><button id="view">View: Chase</button><button id="rst">Reset</button><button id="mnu">Menu</button></div>
 <div id="menu"><div class="card"><h2>🛻 Bronco Drive</h2><p>Pick a level, or drive a random path.</p><div id="lv"></div><div class="rnd">Random path: <button data-s="R1">Easy</button><button data-s="R2">Medium</button><button data-s="R3">Hard</button></div>
 <div class="rnd" id="aim">Driver: <button data-a="">&#129489; You</button><button data-a="auto">&#129302; Auto</button></div>
-<div class="rnd" id="aio">Race vs AI: <button data-o="">Off</button><button data-o="1">1</button><button data-o="2">2</button><button data-o="3">3</button><button data-o="4">4</button></div>
+<div class="rnd" id="aio">Race vs AI (opponents): <button data-o="">Off</button><button data-o="1">1</button><button data-o="2">2</button><button data-o="3">3</button><button data-o="4">4</button></div>
 <div class="rnd" id="acol">Car collisions (2 players, AI race): <button data-c="0">Off</button><button data-c="1">On</button></div>
 <div class="rnd" id="adr">Drivetrain: <button data-d="rwd">RWD</button><button data-d="fwd">FWD</button><button data-d="awd">AWD</button></div>
 <div class="rnd" id="avb">Vibration: <button data-v="1">On</button><button data-v="0">Off</button></div>
@@ -546,9 +546,12 @@ function physStep(dt,inp){
  if(AWDm){ // traction-aware AWD: each wheel's share = grip it still has left after cornering (friction circle), reduced if it is already slipping;
   // total drive torque is capped to what the four tyres can transmit, so the truck accelerates without wheelspin/sliding
   s.aw=s.aw||[0,0,0,0];s.fyP=s.fyP||[0,0,0,0];
-  const cap=WP.map((wp,k)=>{const lm=MU*GM*s.N[k],fl=s.fyP[k],c=Math.sqrt(Math.max(0,lm*lm-fl*fl*.9));return c*(1-cl((s.wSlip[k]-.15)/.45,0,.8))});
-  for(let k=0;k<4;k++){s.aw[k]+=(cap[k]-s.aw[k])*Math.min(1,dt*18);Wgt[k]=s.aw[k]}
-  const cs=Wgt[0]+Wgt[1]+Wgt[2]+Wgt[3];if(cs>1)TwE=Math.sign(inp.Tw)*Math.min(Math.abs(inp.Tw),cs*RWH*.9);
+  // grip each wheel can really use: includes the same low-speed launch grip loss the tyre model applies (rear loses more), so the rears are not over-fed
+  const cap=WP.map((wp,k)=>{const lm=MU*GM*s.N[k]*(1-lowSpdLaunch*(wp[1]<0?.42:.22)),fl=s.fyP[k],c=Math.sqrt(Math.max(0,lm*lm-fl*fl*.9));return c*(1-cl((s.wSlip[k]-.15)/.45,0,.8))});
+  // front-biased split while cornering (up to ~62/38 front/rear): the rear tyres keep their side grip, so the truck pushes wide instead of spinning
+  const RB=1-.4*cl(Math.abs(inp.steer)*3+Math.abs(s.w[1])*.6,0,1);let fc=0,rc=0,fw=0,rw=0;
+  for(let k=0;k<4;k++){s.aw[k]+=(cap[k]-s.aw[k])*Math.min(1,dt*18);const rear=WP[k][1]<0;Wgt[k]=s.aw[k]*(rear?RB:1);if(rear){rc+=s.aw[k];rw+=Wgt[k]}else{fc+=s.aw[k];fw+=Wgt[k]}}
+  const W0=fw+rw;if(W0>1){const tl=Math.min(fw>1?fc*W0/fw:1e9,rw>1?rc*W0/rw:1e9)*RWH*.9;TwE=Math.sign(inp.Tw)*Math.min(Math.abs(inp.Tw),tl)}
  }
  const Wt=Math.max(1,Wgt[0]+Wgt[1]+Wgt[2]+Wgt[3]);
  for(let k=0;k<4;k++){
