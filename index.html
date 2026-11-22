@@ -705,6 +705,13 @@ function physStep(dt,inp){
   s.wSlip[k]=wSl;s.slip=Math.max(s.slip,wSl);
   push(Pc,v_add(v_mul(fd,fx-.015*N*Math.tanh(vl*2)),v_mul(ld,fy)));s.spin[k]=s.ws[k]*RWH;
  }
+ // ---- slide stability assist: once the truck slides sideways, pull its yaw rate back towards what the steering asks for.
+ // Lifting off the gas or counter-steering therefore recovers the slide instead of spinning (strongest in AWD/FWD, lighter in RWD)
+ if(spdHoriz>4&&(s.N[0]+s.N[1]+s.N[2]+s.N[3])>300){
+  const vf=v_dot(s.v,az),vlat=v_dot(s.v,ax),yr=v_dot(s.w,ay),sb=Math.abs(vlat)/Math.max(4,spdHoriz),sf=cl((sb-.08)/.27,0,1);
+  if(sf>0){const Lw=2.4,rdes=cl(vf*Math.tan(cl(inp.steer,-.6,.6))/Lw,-.9,.9),ka=4.5*(1+(1-DR.gas)*.9)*(RWDm?.5:1);
+   T=v_add(T,v_mul(ay,-IYY*cl(ka*sf*(yr-rdes),-7,7)))}
+ }
  if(RWDm&&lowSpdLaunch>.05&&Math.abs(inp.steer)>.03&&(s.N[1]+s.N[3])>400){
   T=v_add(T,v_mul(ay,inp.steer*lowSpdLaunch*14500*(.45+cl(spdHoriz/8,0,.8))));
  }
