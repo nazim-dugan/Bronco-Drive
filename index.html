@@ -76,6 +76,7 @@ html:not(.wheelmode) #wheel{display:none}html.wheelmode #stick{display:none}
 <div class="rnd" id="adr">Drivetrain: <button data-d="rwd">RWD</button><button data-d="fwd">FWD</button><button data-d="awd">AWD</button></div>
 <div class="rnd" id="avb">Vibration: <button data-v="1">On</button><button data-v="0">Off</button></div>
 <div class="rnd" id="agr">Wheel grip: <input type="range" id="grp" min="50" max="150" step="5" value="100" aria-label="Wheel grip"> <span id="grv">100%</span></div>
+<div class="rnd" id="apw">Engine power: <input type="range" id="pwr" min="50" max="150" step="5" value="100" aria-label="Engine power"> <span id="pwv">100%</span></div>
 <div class="rnd" id="aip">AI speed: <button data-p="0">Slow</button><button data-p="1">Medium</button><button data-p="2">Fast</button><button data-p="3">Turbo</button></div>
 <div class="rnd"><button id="mp2">👥 Two players (WiFi)</button></div>
 <div id="mpp" style="display:none;margin-top:10px;text-align:left"><div id="mpa"><select id="mpl"><option value="L1">1 · Sunny Meadow</option><option value="L2">2 · Rolling Hills</option><option value="L3">3 · Ridge Trail</option><option value="L4">4 · Rocky Climb</option><option value="L5">5 · Mountain Pass</option><option value="R2">Random path</option></select>
@@ -97,7 +98,7 @@ function bdAudio(){try{const A=window.AudioContext||window.webkitAudioContext;if
 function bdLaunch(sel,seed,mp,col){bdAudio();if(bdFrame)bdFrame.remove();bdFrame=document.createElement('iframe');
  bdFrame.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;z-index:30;background:#000';bdFrame.setAttribute('allow','autoplay');
  bdFrame.onload=()=>{try{bdFrame.contentWindow.focus()}catch(e){}};
- bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+(DRVM?'window.__DRV="'+DRVM+'";':'')+'window.__GRIP='+GRIPV+';window.__VIB="'+VIBV+'";'+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
+ bdFrame.srcdoc=SRC.replace('<head>','<head><script>window.__SEL="'+sel+'";'+(seed!==undefined?'window.__SEED='+seed+';':'')+(mp?'window.__MP='+mp+';':'')+(AIM?'window.__AI="'+AIM+'";':'')+(DRVM?'window.__DRV="'+DRVM+'";':'')+'window.__GRIP='+GRIPV+';window.__PWR='+PWRV+';window.__VIB="'+VIBV+'";'+'window.__AIS='+AIP+';'+(AIO?'window.__AIO="'+AIO+'";':'')+((col===undefined?COL:col)?'window.__COL=1;':'')+'<\/script>');
  document.body.appendChild(bdFrame);menuEl0.style.display='none'}
 addEventListener('message',e=>{const d=e.data;if(!d||!d.bd)return;
  if(d.bd==='go')bdLaunch(d.sel);else if(d.bd==='net'&&bdFrame&&e.source===bdFrame.contentWindow)mpFromGame(d.m);
@@ -121,6 +122,9 @@ document.querySelectorAll('#avb button').forEach(b=>b.onclick=()=>{VIBV=b.datase
 let GRIPV=100;try{GRIPV=+localStorage.getItem('bd-grip')||100}catch(e){}
 const grp=document.getElementById('grp'),grv=document.getElementById('grv');grp.value=GRIPV;grv.textContent=GRIPV+'%';
 grp.oninput=()=>{GRIPV=+grp.value;grv.textContent=GRIPV+'%';try{localStorage.setItem('bd-grip',GRIPV)}catch(e){}};
+let PWRV=100;try{PWRV=+localStorage.getItem('bd-pow')||100}catch(e){}
+const pwr=document.getElementById('pwr'),pwv=document.getElementById('pwv');pwr.value=PWRV;pwv.textContent=PWRV+'%';
+pwr.oninput=()=>{PWRV=+pwr.value;pwv.textContent=PWRV+'%';try{localStorage.setItem('bd-pow',PWRV)}catch(e){}};
 let AIP=0;try{AIP=+localStorage.getItem('bd-aip')||0}catch(e){}
 function aipShow(){document.querySelectorAll('#aip button').forEach(b=>b.classList.toggle('on',+b.dataset.p===AIP))}
 document.querySelectorAll('#aip button').forEach(b=>b.onclick=()=>{AIP=+b.dataset.p;try{localStorage.setItem('bd-aip',AIP)}catch(e){}aipShow()});aipShow();
@@ -583,11 +587,12 @@ addEventListener('keydown',e=>{if(KM[e.code]){keys[KM[e.code]]=1;e.preventDefaul
 addEventListener('keyup',e=>{if(KM[e.code])keys[KM[e.code]]=0});
 // ---- camera views ----
 const V=[{n:'Chase',d:9,h:3.6,f:62},{n:'Far chase',d:17,h:8,f:55},{n:'Top-down',d:3,h:32,f:50},{n:'Cockpit',f:78},{n:'Road view',f:78}];
-let vi=1,cockDy=0,ch=0,yawO=0,pitO=0,zoom=1;
-// front-corner view (Far chase only): after a sudden slow-down (hit/brake) below FC_STOP km/h the camera swings to the front corner; returns when the car drives forward again (stays while reversing)
-const FC_STOP=5,FC_GO=7,FC_FAST=12,FC_WIN=6,FC_ANG=2.3;let fcOn=0,fc=0,fcPk=99,CSA=0; // fcPk = seconds since the car last went faster than FC_FAST km/h
+let vi=1;try{let sv=null;try{sv=window.parent!==window?window.parent.__bdView:undefined}catch(e){}if(sv==null)sv=localStorage.getItem('bd-view');if(sv!=null&&sv!==''&&+sv>=0&&+sv<V.length)vi=+sv}catch(e){} // remembered view
+let cockDy=0,ch=0,yawO=0,pitO=0,zoom=1;
+// front-corner view (all views): after a sudden slow-down (hit/brake) below FC_STOP km/h the camera switches to Far chase and swings to the front corner; when the car drives forward again it returns to the selected view (stays while reversing)
+const FC_STOP=5,FC_GO=7,FC_FAST=12,FC_WIN=6,FC_ANG=2.3;let fcOn=0,fc=0,fcPk=99,CSA=0,vShown=vi; // fcPk = seconds since the car last went faster than FC_FAST km/h
 const vb=document.getElementById('view');
-function nextView(){vi=(vi+1)%V.length;fcOn=0;fcPk=99;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;yawO=pitO=0}
+function nextView(){vi=(vi+1)%V.length;try{window.parent.__bdView=vi}catch(e){}try{localStorage.setItem('bd-view',vi)}catch(e){}fcOn=0;fcPk=99;vShown=vi;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;yawO=pitO=0}
 vb.onclick=nextView;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;
 const Pt=new Map();let pd=0;
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);Pt.set(e.pointerId,[e.clientX,e.clientY])});
@@ -768,7 +773,7 @@ function drive(dt,wav,grounded,slip){const n=Math.ceil(dt/4e-4),h=dt/n,rt=curG()
  for(let i=0;i<n;i++){const rpm=DR.w*9.549,e=900-rpm;
   if(DR.gas<.02)DR.idleI=cl(DR.idleI+e*4e-4*h,0,.3);
   let thr=Math.max(DR.gas,cl(DR.idleI+e*5e-4,0,.4));DR.cut=rpm>6500?true:rpm<6300?false:DR.cut;if(DR.cut)thr=0;DR.thr=thr;
-  DR.Te=Tmax(DR.w)*thr-(FR0+FR1*DR.w+(1-thr)*FR2*DR.w);
+  DR.Te=Tmax(DR.w)*thr*((window.__PWR||100)/100)-(FR0+FR1*DR.w+(1-thr)*FR2*DR.w);
   const wt=wl*rt,we=DR.w,g=rt&&grounded?DR.ramp:0,sr=cl(wt/we,0,1),
    tp=TCK*(we*we-Math.max(0,wt)**2)*g,tr=tp>0&&sr<SRC?1+(TR0-1)*(1-sr/SRC):1,
    lk=g*sstep((rpm-1500)/400)*sstep((sr-.78)/.12)*(1-sstep((slip-.28)/.15)),tl=TCM*lk*Math.tanh((we-wt)/3);
@@ -1069,14 +1074,17 @@ function step(dt){wetHud(dt);
  document.getElementById('hud').firstChild.nodeValue=Math.round(sp*3.6)+' ';engine();dashUpdate(sp);
 }
 function cam(dt){
- const v=V[vi];ch+=wrap(car.h-ch)*Math.min(1,dt*(vi>=3?14:3));
- if(!Pt.size)yawO*=Math.exp(-1.6*dt);if(!Pt.size&&vi<3)pitO*=Math.exp(-1.6*dt);
- if(vi<2){const hs=Math.hypot(sim.v[0],sim.v[2])*3.6,fw=(sim.v[0]*Math.sin(car.h)+sim.v[2]*Math.cos(car.h))*3.6;
+ {const hs=Math.hypot(sim.v[0],sim.v[2])*3.6,fw=(sim.v[0]*Math.sin(car.h)+sim.v[2]*Math.cos(car.h))*3.6;
   if(hs>FC_FAST)fcPk=0;else fcPk+=dt;
-  if(!fcOn){if(hs<FC_STOP&&fcPk<FC_WIN)fcOn=1}else if(fw>FC_GO)fcOn=0}else fcOn=0;
+  if(!fcOn){if(hs<FC_STOP&&fcPk<FC_WIN)fcOn=1}else if(fw>FC_GO)fcOn=0}
+ const ve=fcOn?1:vi; // effective view: Far chase while the front-corner view is active, otherwise the selected view
+ if(ve!==vShown){vShown=ve;carRoot.visible=ve!==4;C.fov=V[ve].f;C.updateProjectionMatrix()}
+ if(ve>=3)fc=0;
+ const v=V[ve];ch+=wrap(car.h-ch)*Math.min(1,dt*(ve>=3?14:3));
+ if(!Pt.size)yawO*=Math.exp(-1.6*dt);if(!Pt.size&&ve<3)pitO*=Math.exp(-1.6*dt);
  fc+=((fcOn?FC_ANG:0)-fc)*Math.min(1,dt*2.5);
- const a=ch+yawO+(vi<3?fc:0);C.up.set(0,1,0);
- if(vi>=3){carRoot.updateMatrixWorld(true);const L=(x,y,z)=>pivot.localToWorld(new THREE.Vector3(x,y,z)),EY=1.02,P=L(.36,EY,.2),U=L(.36,EY+1,.2).sub(P).normalize() /* EY = cockpit eye height (was .74): higher so the hood doesn't hide the road */,p=cl(-pitO*.4,-.5,.5),
+ const a=ch+yawO+(ve<3?fc:0);C.up.set(0,1,0);
+ if(ve>=3){carRoot.updateMatrixWorld(true);const L=(x,y,z)=>pivot.localToWorld(new THREE.Vector3(x,y,z)),EY=1.02,P=L(.36,EY,.2),U=L(.36,EY+1,.2).sub(P).normalize() /* EY = cockpit eye height (was .74): higher so the hood doesn't hide the road */,p=cl(-pitO*.4,-.5,.5),
    tx=P.x+Math.sin(a)*12,tz=P.z+Math.cos(a)*12,dy=cl(H(tx,tz)-.3-P.y,-4.5,4.5);
   cockDy+=(dy-cockDy)*Math.min(1,dt*4);
   C.position.copy(P);C.up.copy(U).lerp(new THREE.Vector3(0,1,0),.6).normalize();C.lookAt(tx,P.y+cockDy+Math.sin(p)*12,tz)}
