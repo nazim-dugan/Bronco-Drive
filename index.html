@@ -603,15 +603,18 @@ cv.addEventListener('pointermove',e=>{if(!Pt.has(e.pointerId))return;const o=Pt.
  if(Pt.size===2){const[p,q]=[...Pt.values()],d=Math.hypot(p[0]-q[0],p[1]-q[1]);if(pd)zoom=Math.min(2.5,Math.max(.5,zoom*pd/d));pd=d}});
 cv.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.min(2.5,Math.max(.5,zoom*(1+e.deltaY*.001)))},{passive:false});
 // ---- engine & tire screech sound (Web Audio) ----
-let AC,eo1,eo2,ef,eg,sgain,sfilt,muted=(()=>{try{return localStorage.getItem('bd-muted')==='1'}catch(e){return false}})();
+let AC,eo1,eo2,eo3,eo4,wg,wg3,rf,rg,ef,eg,sgain,sfilt,muted=(()=>{try{return localStorage.getItem('bd-muted')==='1'}catch(e){return false}})();
 let AOUT=null;
 function audioInit(){if(AC)return;try{let pa=null;try{pa=window.parent!==window&&window.parent.__bdAC&&window.parent.__bdOut?window.parent:null}catch(e){}AC=pa?pa.__bdAC:new(window.AudioContext||window.webkitAudioContext)();AOUT=pa?pa.__bdOut:AC.destination;
- eo1=AC.createOscillator();eo1.type='sawtooth';eo2=AC.createOscillator();eo2.type='square';
- ef=AC.createBiquadFilter();ef.type='lowpass';ef.Q.value=2;ef.frequency.value=380;eo1.frequency.value=41;eo2.frequency.value=20.5;eg=AC.createGain();eg.gain.value=muted?0:.06;
- const sub=AC.createGain();sub.gain.value=.5;
- eo1.connect(ef);eo2.connect(sub);sub.connect(ef);ef.connect(eg);eg.connect(AOUT);eo1.start();eo2.start();
+ // hybrid engine: classic saw/square engine body + softer turbine whine + light roar; everything follows rpm / throttle in engine()
  const bLen=AC.sampleRate*2,nBuf=AC.createBuffer(1,bLen,AC.sampleRate),nData=nBuf.getChannelData(0);
  for(let i=0;i<bLen;i++)nData[i]=Math.random()*2-1;
+ eg=AC.createGain();eg.gain.value=muted?0:.09;eg.connect(AOUT);
+ eo1=AC.createOscillator();eo1.type='sine';eo1.frequency.value=900;wg=AC.createGain();wg.gain.value=.05;eo1.connect(wg);wg.connect(eg);
+ eo3=AC.createOscillator();eo3.type='triangle';eo3.frequency.value=1820;wg3=AC.createGain();wg3.gain.value=.018;eo3.connect(wg3);wg3.connect(eg);
+ eo2=AC.createOscillator();eo2.type='sawtooth';eo2.frequency.value=41;eo4=AC.createOscillator();eo4.type='square';eo4.frequency.value=20.5;ef=AC.createBiquadFilter();ef.type='lowpass';ef.Q.value=2;ef.frequency.value=380;const rum=AC.createGain();rum.gain.value=.8;const sub=AC.createGain();sub.gain.value=.5;eo2.connect(ef);eo4.connect(sub);sub.connect(ef);ef.connect(rum);rum.connect(eg);
+ const nE=AC.createBufferSource();nE.buffer=nBuf;nE.loop=true;rf=AC.createBiquadFilter();rf.type='bandpass';rf.Q.value=.7;rf.frequency.value=600;rg=AC.createGain();rg.gain.value=.3;nE.connect(rf);rf.connect(rg);rg.connect(eg);
+ eo1.start();eo2.start();eo3.start();eo4.start();nE.start();
  const nSrc=AC.createBufferSource();nSrc.buffer=nBuf;nSrc.loop=true;
  sfilt=AC.createBiquadFilter();sfilt.type='bandpass';sfilt.frequency.value=950;sfilt.Q.value=1.8;
  sgain=AC.createGain();sgain.gain.value=0;
@@ -625,10 +628,12 @@ const muteBtn=document.getElementById('mute');muteBtn.textContent=muted?'🔇':'
 muteBtn.onclick=()=>{muted=!muted;muteBtn.textContent=muted?'🔇':'🔊';try{localStorage.setItem('bd-muted',muted?'1':'0')}catch(e){}};
 const GM=[7,13,19,25,40];
 function engine(){if(!AC||AC.state!=='running')return;
- const rpm=.18+.82*cl((DR.w*9.549-700)/5800,0,1),thr=DR.gas,t=AC.currentTime,f=26+rpm*80;
- eo1.frequency.setTargetAtTime(f,t,.05);eo2.frequency.setTargetAtTime(f*.5,t,.05);
- ef.frequency.setTargetAtTime(250+rpm*700+thr*500,t,.08);
- eg.gain.setTargetAtTime((muted||car.crash)?0:.05+.11*thr+.04*rpm,t,.08);
+ const rpm=.18+.82*cl((DR.w*9.549-700)/5800,0,1),thr=DR.gas,t=AC.currentTime,W=450+rpm*1300+thr*100,f=26+rpm*80;
+ eo2.frequency.setTargetAtTime(f,t,.05);eo4.frequency.setTargetAtTime(f*.5,t,.05);ef.frequency.setTargetAtTime(250+rpm*700+thr*500,t,.08);
+ eo1.frequency.setTargetAtTime(W,t,.07);eo3.frequency.setTargetAtTime(W*2.02,t,.07);
+ wg.gain.setTargetAtTime(.02+.032*rpm+.012*thr,t,.08);wg3.gain.setTargetAtTime(.006+.014*rpm,t,.08);
+ rf.frequency.setTargetAtTime(300+rpm*1100+thr*600,t,.08);rg.gain.setTargetAtTime(.1+.4*rpm*(.35+.65*thr),t,.08);
+ eg.gain.setTargetAtTime((muted||car.crash)?0:.07+.09*thr+.035*rpm,t,.08);
  const slideAmt=cl((sim.slip-.28)/1.1,0,1);
  if(sgain){
   sgain.gain.setTargetAtTime((muted||car.crash)?0:slideAmt*.09,t,.06);
