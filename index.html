@@ -10,6 +10,8 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 button{font:inherit;color:var(--fg);background:var(--chip);border:1px solid #6668;border-radius:22px;padding:9px 16px;font-size:15px;touch-action:none}
 button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .top{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:10px;display:flex;gap:8px}
+/* fixed widths: a changing label (view/AI/steer names) must not resize the button, or the buttons beside it shift under your finger and the next tap hits the wrong one */
+.top button{text-align:center}#aib{min-width:calc(9ch + 26px)}#aisb{min-width:calc(10ch + 26px)}#stb{min-width:calc(12ch + 26px)}#view{min-width:calc(15ch + 26px)}
 #hud{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;font-size:26px;color:#fff;text-shadow:0 1px 4px #0008}
 #hud small{font-size:14px;opacity:.85}
 #bar{position:fixed;left:0;right:0;bottom:0;padding:24px 12px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"dash dash dash" "wheel drv pedals";align-items:end;gap:6px 10px;background:linear-gradient(#0b0d1000,#0b0d10b8 28%)}
@@ -593,7 +595,7 @@ let cockDy=0,ch=0,yawO=0,pitO=0,zoom=1;
 const FC_STOP=5,FC_GO=7,FC_FAST=12,FC_WIN=6,FC_ANG=2.3;let fcOn=0,fc=0,fcPk=99,CSA=0,vShown=vi; // fcPk = seconds since the car last went faster than FC_FAST km/h
 const vb=document.getElementById('view');
 function nextView(){vi=(vi+1)%V.length;try{window.parent.__bdView=vi}catch(e){}try{localStorage.setItem('bd-view',vi)}catch(e){}fcOn=0;fcPk=99;vShown=vi;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;yawO=pitO=0}
-vb.onclick=nextView;carRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;
+vb.onclick=nextView;document.querySelectorAll('.top button').forEach(b=>b.addEventListener('click',()=>b.blur())); // keep keyboard keys (space = brake) from re-pressing the last buttoncarRoot.visible=vi!==4;C.fov=V[vi].f;C.updateProjectionMatrix();vb.textContent='View: '+V[vi].n;
 const Pt=new Map();let pd=0;
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);Pt.set(e.pointerId,[e.clientX,e.clientY])});
 ['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,e=>{Pt.delete(e.pointerId);pd=0}));
