@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Bronco Drive controller</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:#0d1117;color:#e6edf3;font:16px system-ui,sans-serif;overflow:hidden;touch-action:none}
+button,input{font:inherit;color:inherit}
+button{background:#1b2129;border:1px solid #556;border-radius:16px;padding:10px 14px;touch-action:none}
+input{background:#161b22;border:1px solid #556;border-radius:12px;padding:10px 12px;text-align:center;width:220px;-webkit-user-select:text;user-select:text}
+#setup{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center}
+#setup small{color:#9aa4b2;max-width:340px}
+#go{background:#1f6feb;border-color:#1f6feb;font-weight:700;padding:12px 28px}
+#pad{display:none;height:100%;grid-template-columns:1fr 170px 1fr;gap:12px;padding:12px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left))}
+.pb{--l:0;font:700 26px system-ui;letter-spacing:2px;border-radius:22px;border:2px solid #556;background:linear-gradient(to top,var(--c) calc(var(--l)*100%),#161b22 0)}
+#brake{--c:#a3262c}#gas{--c:#238a3f}
+#mid{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#st{font-size:13px;color:#ff9b6b;text-align:center;min-height:2.6em}#st.ok{color:#4cc3ff}
+#gy{font-size:12px;color:#ffd24a;text-align:center}
+#bar{position:relative;width:100%;height:14px;border-radius:7px;background:#161b22;border:1px solid #445}
+#bar i{position:absolute;top:1px;bottom:1px;width:14px;border-radius:7px;background:#4cc3ff;left:calc(50% - 7px)}
+#drv{width:110px;height:110px;border-radius:24px;font:700 46px system-ui;color:#4cc3ff;border:3px solid #4cc3ff}
+#drv.rev{color:#ff6a3d;border-color:#ff6a3d}
+#drv small{display:block;font:11px system-ui;color:#8a94a3}
+.row{display:flex;gap:6px;align-items:center;font-size:12px;color:#9aa4b2}
+.row input{width:90px;padding:0}
+#rot{display:none;position:fixed;inset:0;z-index:9;background:#0d1117;align-items:center;justify-content:center;font-size:20px;text-align:center;padding:30px}
+@media (orientation:portrait){#rot.on{display:flex}}
+</style></head><body>
+<div id="setup">
+ <h2 style="margin:0">🎮 Bronco Drive controller</h2>
+ <small>In the game menu tap “Phone controller”, type a room name and tap Open. Then enter the same name here.</small>
+ <input id="room" placeholder="room name" autocapitalize="off" autocomplete="off">
+ <button id="go">Start</button>
+ <small id="err" style="color:#ff9b6b"></small>
+ <small>Hold the phone sideways like a steering wheel. Tilt to steer.</small>
+</div>
+<div id="pad">
+ <button class="pb" id="brake">BRAKE</button>
+ <div id="mid">
+  <div id="st"></div>
+  <div id="bar"><i id="knob"></i></div>
+  <button id="drv"><span id="drvL">D</span><small>D ⇄ R</small></button>
+  <div class="row"><button id="cal">Centre</button><button id="flip">Flip</button></div>
+  <div class="row">Lock <input id="lock" type="range" min="25" max="70" value="45"></div>
+  <div id="gy"></div>
+ </div>
+ <button class="pb" id="gas">GAS</button>
+</div>
+<div id="rot">↻ Turn your phone sideways</div>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let room='',peer=null,conn=null,rt=0,roll=null,center=0,full=45,flip=0,g=0,b=0,st=0;
+try{room=new URLSearchParams(location.search).get('room')||localStorage.getItem('bd-ctl-room')||'';flip=+localStorage.getItem('bd-ctl-flip')||0;full=+localStorage.getItem('bd-ctl-lock')||45}catch(e){}
+$('room').value=room;$('lock').value=full;
+const status=(t,ok)=>{$('st').textContent=t;$('st').className=ok?'ok':''};
+const send=m=>{if(conn&&conn.open)conn.send(JSON.stringify(m))};
+
+// ---- steering: angle of gravity inside the screen plane (works for any landscape direction and tilt) ----
+addEventListener('deviceorientation',e=>{if(e.beta==null||e.gamma==null)return;
+ const B=e.beta*Math.PI/180,G=e.gamma*Math.PI/180,ux=-Math.cos(B)*Math.sin(G),uy=Math.sin(B);
+ const a=(screen.orientation&&screen.orientation.angle!=null)?screen.orientation.angle:(window.orientation||0),A=((a%360)+360)%360;
+ roll=A===90?Math.atan2(-uy,ux):A===270?Math.atan2(uy,-ux):A===180?Math.atan2(-ux,-uy):Math.atan2(ux,uy)});
+function steer(){if(roll===null)return 0;let d=roll-center;d=Math.atan2(Math.sin(d),Math.cos(d));let s=-d/(full*Math.PI/180);if(flip)s=-s;
+ const dz=.03;s=Math.abs(s)<dz?0:Math.sign(s)*(Math.abs(s)-dz)/(1-dz);return Math.max(-1,Math.min(1,s))}
+$('cal').onclick=()=>{if(roll!==null)center=roll};
+$('flip').onclick=()=>{flip^=1;try{localStorage.setItem('bd-ctl-flip',flip)}catch(e){}};
+$('lock').oninput=e=>{full=+e.target.value;try{localStorage.setItem('bd-ctl-lock',full)}catch(x){}};
+
+// ---- pedals: touch height = pressure level 1-5, like the pedals in the game ----
+function pedal(el,k){const set=e=>{const r=el.getBoundingClientRect(),j=Math.min(5,Math.max(1,Math.ceil((r.bottom-e.clientY)/r.height*5)));k?g=j:b=j;el.style.setProperty('--l',j/5)};
+ el.addEventListener('pointerdown',e=>{e.preventDefault();el.setPointerCapture(e.pointerId);set(e)});
+ el.addEventListener('pointermove',e=>{if(el.hasPointerCapture(e.pointerId))set(e)});
+ const up=()=>{k?g=0:b=0;el.style.setProperty('--l',0)};['pointerup','pointercancel','lostpointercapture'].forEach(n=>el.addEventListener(n,up))}
+pedal($('gas'),1);pedal($('brake'),0);
+$('drv').addEventListener('pointerdown',e=>{e.preventDefault();send({t:'gear'});try{navigator.vibrate&&navigator.vibrate(15)}catch(x){}});
+
+// ---- connection: same PeerJS room idea as the two-player mode ----
+const retry=ms=>{if(rt)return;rt=setTimeout(()=>{rt=0;connect()},ms)};
+function connect(){if(!peer||peer.destroyed)return;status('Looking for the game...');
+ const c=conn=peer.connect('bronco-drive-'+room+'-ctl',{reliable:true});
+ c.on('open',()=>status('Connected to the game',1));
+ c.on('data',d=>{try{const m=JSON.parse(d);if(m.t==='gear'){$('drvL').textContent=m.s==='R'?'R':'D';$('drv').classList.toggle('rev',m.s==='R')}}catch(x){}});
+ c.on('close',()=>{status('Disconnected. Retrying...');retry(1500)});c.on('error',()=>{})}
+$('go').onclick=async()=>{room=$('room').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'');if(!room){$('err').textContent='Type the room name first.';return}
+ try{localStorage.setItem('bd-ctl-room',room)}catch(e){}
+ try{if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission){const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){$('err').textContent='Motion access was denied. Allow it in the browser settings and reload.';return}}}catch(e){}
+ try{await document.documentElement.requestFullscreen();await screen.orientation.lock('landscape')}catch(e){}
+ try{navigator.wakeLock&&await navigator.wakeLock.request('screen')}catch(e){}
+ $('setup').style.display='none';$('pad').style.display='grid';$('rot').classList.add('on');
+ setTimeout(()=>{if(roll===null)$('gy').textContent='No motion data. Use the HTTPS page and allow motion access.'},1500);
+ peer=new Peer();peer.on('open',connect);peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
+ peer.on('error',e=>{if(e.type==='peer-unavailable'){status('The game is not waiting yet. In the game menu open “Phone controller” with this room name.');retry(2000)}else status('Connection problem: '+e.type)});
+ setInterval(()=>{st=steer();$('knob').style.left='calc('+(50+st*46)+'% - 7px)';send({t:'s',st:+st.toFixed(3),g,b})},20)};
+</script></body></html>
